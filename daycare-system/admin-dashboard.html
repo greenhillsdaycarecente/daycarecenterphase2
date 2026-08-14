@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Greenhills Phase II Daycare – Teacher/Admin Dashboard</title>
+<link rel="stylesheet" href="admin-dashboard.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body style="background-image: url('adminback.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<button class="hamburger" onclick="toggleSidebar()">&#9776;</button>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <!-- KEEP YOUR ORIGINAL BASE64 LOGO IMAGE HERE — paste the same
+         src="data:image/png;base64,..." value from your existing file.
+         Nothing about this value changed in this update. -->
+    <img src="g.png" alt="Logo" class="logo-img" />
+    <div class="logo-text">
+      <strong>Greenhills Phase II</strong>
+      <span>Daycare Center</span>
+    </div>
+  </div>
+
+  <!-- Role badge — change class to "teacher" or "admin" -->
+  <div class="role-badge admin" id="roleBadge"><i class="fa-solid fa-user-shield"></i> Teacher/Administrator</div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <button class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard
+    </button>
+
+    <div class="nav-section-label">Enrollment</div>
+    <button class="nav-item" onclick="navigate('enrollment', this)">
+      <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> Enrollment Details
+    </button>
+
+    <div class="nav-section-label">Performance</div>
+    <button class="nav-item" onclick="navigate('performance', this)">
+      <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Performance Reports
+    </button>
+    <button class="nav-item" onclick="navigate('age-calc', this)">
+      <span class="nav-icon"><i class="fa-solid fa-cake-candles"></i></span> Age Calculation
+    </button>
+    <button class="nav-item" onclick="navigate('print', this)">
+      <span class="nav-icon"><i class="fa-solid fa-print"></i></span> Print Report
+    </button>
+
+    <div class="nav-section-label">Account</div>
+    <button class="nav-item" onclick="navigate('manage-accounts', this)">
+      <span class="nav-icon"><i class="fa-solid fa-users"></i></span> Manage Accounts
+    </button>
+    <button class="nav-item" onclick="navigate('change-password', this)">
+      <span class="nav-icon"><i class="fa-solid fa-lock"></i></span> Change Password
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="logout-btn" onclick="showLogout()">
+      <span><i class="fa-solid fa-right-from-bracket"></i></span> Log Out
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main class="main">
+
+  <!-- ──────────── DASHBOARD ──────────── -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select class="sy-select" id="syBadgeWrap1" onchange="quickChangeSchoolYear(this.value)" title="Switch school year"></select>
+        <button class="sy-gear-btn" onclick="openSchoolYearModal()" title="Advanced school year settings" style="background:var(--card-bg);border:1.5px solid #BFDBFE;border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:14px;">&#9881;&#65039;</button>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card" style="cursor:pointer;" onclick="goToEnrollFiltered('all')">
+        <div class="stat-icon blue">&#128100;</div>
+        <div>
+          <div class="stat-label">Total Enrolled</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;" onclick="goToEnrollFiltered('pending')">
+        <div class="stat-icon yellow">&#9203;</div>
+        <div>
+          <div class="stat-label">Pending Approval</div>
+          <div class="stat-value" id="statPending">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;" onclick="goToEnrollFiltered('approved')">
+        <div class="stat-icon green">&#9989;</div>
+        <div>
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="statApproved">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;" onclick="goToEnrollFiltered('approved','Morning')">
+        <div class="stat-icon orange">&#9728;&#65039;</div>
+        <div>
+          <div class="stat-label">Morning Class</div>
+          <div class="stat-value" id="statMorning">0</div>
+        </div>
+      </div>
+      <div class="stat-card" style="cursor:pointer;" onclick="goToEnrollFiltered('approved','Afternoon')">
+        <div class="stat-icon purple">&#127769;</div>
+        <div>
+          <div class="stat-label">Afternoon Class</div>
+          <div class="stat-value" id="statAfternoon">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Performance Overview Mini Cards -->
+    <div class="section-card">
+      <div class="section-title">&#11088; Average Rating by Developmental Domain</div>
+      <div class="perf-overview-grid" id="perfOverviewGrid"></div>
+    </div>
+
+    <!-- Average Rating Line Graph -->
+    <div class="section-card performance-chart-card">
+      <div class="section-header">
+        <div>
+          <div class="section-title">&#128200; Average Rating by Developmental Domain</div>
+          <div class="chart-subtitle">Average normalized rating of assessed children across the seven developmental domains.</div>
+        </div>
+      </div>
+      <div class="performance-chart-wrap">
+        <canvas id="domainAverageChart" aria-label="Line graph showing average rating by developmental domain"></canvas>
+        <div id="domainAverageChartEmpty" class="performance-chart-empty" style="display:none;">No assessed children yet — the line graph will appear once performance ratings are recorded.</div>
+      </div>
+    </div>
+
+    <!-- Recent Enrollments -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">&#128203; Recent Enrollment Submissions</div>
+        <button class="btn-primary" onclick="navigate('enrollment', document.querySelector('[onclick*=enrollment]'))">View All</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Child Name</th>
+              <th>Age</th>
+              <th>Class</th>
+              <th>Date Submitted</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="dashRecentBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── ENROLLMENT DETAILS ──────────── -->
+  <div class="page" id="page-enrollment">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select class="sy-select" id="syBadgeWrap2" onchange="quickChangeSchoolYear(this.value)" title="Switch school year"></select>
+        <button class="sy-gear-btn" onclick="openSchoolYearModal()" title="Advanced school year settings" style="background:var(--card-bg);border:1.5px solid #BFDBFE;border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:14px;">&#9881;&#65039;</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterEnroll('all', this)">All (<span id="countAll">0</span>)</button>
+      <button class="tab-btn" onclick="filterEnroll('pending', this)"><i class="fa-solid fa-hourglass-half"></i> Pending (<span id="countPending">0</span>)</button>
+      <button class="tab-btn" onclick="filterEnroll('approved', this)"><i class="fa-solid fa-circle-check"></i> Approved (<span id="countApproved">0</span>)</button>
+      <button class="tab-btn" onclick="filterEnroll('rejected', this)"><i class="fa-solid fa-circle-xmark"></i> Rejected (<span id="countRejected">0</span>)</button>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="search-bar">
+          <input class="search-input" type="text" id="enrollSearch" placeholder="Search child name..." oninput="onSearchChange()" />
+          <select class="filter-select" id="enrollClassFilter" onchange="onClassFilterChange()">
+            <option value="">All Classes</option>
+            <option value="Morning">Morning Class</option>
+            <option value="Afternoon">Afternoon Class</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="enrollTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Child Name</th>
+              <th>Age</th>
+              <th>Class</th>
+              <th>Parent/Guardian</th>
+              <th>Contact</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="enrollTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── AGE CALCULATION ──────────── -->
+  <div class="page" id="page-age-calc">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select class="sy-select" id="ageCalcSyWrap" onchange="quickChangeSchoolYear(this.value)" title="Switch school year"></select>
+        <button class="sy-gear-btn" onclick="openSchoolYearModal()" title="Advanced school year settings" style="background:var(--card-bg);border:1.5px solid #BFDBFE;border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:14px;">&#9881;&#65039;</button>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Enrolled Children — Age Overview</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Child Name</th>
+              <th>Child ID</th>
+              <th>Class</th>
+              <th>Date of Birth</th>
+              <th>Current Age</th>
+              <th>Age at End of School Year</th>
+            </tr>
+          </thead>
+          <tbody id="ageCalcBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── PERFORMANCE REPORTS ──────────── -->
+  <div class="page" id="page-performance">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <select class="sy-select" id="syBadgeWrap3" onchange="quickChangeSchoolYear(this.value)" title="Switch school year"></select>
+        <button class="sy-gear-btn" onclick="openSchoolYearModal()" title="Advanced school year settings" style="background:var(--card-bg);border:1.5px solid #BFDBFE;border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:14px;">&#9881;&#65039;</button>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="stats-grid" style="margin-bottom:20px;">
+      <div class="stat-card">
+        <div class="stat-icon green">&#11088;</div>
+        <div><div class="stat-label">Overall Average</div><div class="stat-value" id="statOverallAvg">0.0</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue">&#128100;</div>
+        <div><div class="stat-label">Children Assessed</div><div class="stat-value" id="statChildrenAssessed">0</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow">&#127942;</div>
+        <div><div class="stat-label">Outstanding</div><div class="stat-value" id="statOutstanding">0</div></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">All Children Performance</div>
+        <div class="search-bar">
+          <input class="search-input" type="text" id="perfSearch" placeholder="Search child..." oninput="renderAll()" />
+          <select class="filter-select" id="perfClassFilter" onchange="renderAll()">
+            <option value="">All Classes</option>
+            <option value="Morning">Morning Class</option>
+            <option value="Afternoon">Afternoon Class</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="perf-table">
+          <thead>
+            <tr>
+              <th>Child Name</th>
+              <th>Class</th>
+              <th>Gross Motor</th>
+              <th>Fine Motor</th>
+              <th>Self-Help</th>
+              <th>Receptive Lang.</th>
+              <th>Expressive Lang.</th>
+              <th>Cognitive</th>
+              <th>Social-Emotional</th>
+              <th>Final Avg.</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="perfTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── PRINT REPORT ──────────── -->
+  <div class="page" id="page-print">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">Select Report to Print</div>
+        <div class="search-bar">
+          <input class="search-input" type="text" id="printSearch" placeholder="Search child name..." oninput="renderAll()" />
+          <select class="filter-select" id="printClassFilter" onchange="renderAll()">
+            <option value="">All Classes</option>
+            <option value="Morning">Morning Class</option>
+            <option value="Afternoon">Afternoon Class</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Child Name</th>
+              <th>Class</th>
+              <th>Final Rating</th>
+              <th>Status</th>
+              <th>Print</th>
+            </tr>
+          </thead>
+          <tbody id="printTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="print-center" style="padding:30px 20px 10px;">
+        <div class="print-icon-big">&#128424;</div>
+        <div style="font-size:16px;font-weight:800;color:var(--text-dark);">Batch Print All Reports</div>
+        <div style="font-size:13px;color:var(--text-mid);max-width:320px;">Generate a printable report for all enrolled children for the current school year.</div>
+        <button class="print-btn" onclick="handlePrintAll()">&#128424; Generate &amp; Print All Reports</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── MANAGE ACCOUNTS ──────────── -->
+  <div class="page" id="page-manage-accounts">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Contact</th>
+              <th>Linked Child</th>
+              <th>Account Created</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="parentAccountsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────── CHANGE PASSWORD ──────────── -->
+  <div class="page" id="page-change-password">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="password-form">
+        <div class="lock-icon-big">&#128272;</div>
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Enter current password" id="curPwd" />
+            <button class="eye-btn" onclick="togglePwd('curPwd',this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Enter new password" id="newPwd" />
+            <button class="eye-btn" onclick="togglePwd('newPwd',this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Confirm new password" id="confPwd" />
+            <button class="eye-btn" onclick="togglePwd('confPwd',this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <button class="update-btn" onclick="handleUpdatePassword()">&#128274; Update Password</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════ ENROLLMENT DETAIL MODAL ══════════ -->
+<div class="modal-overlay" id="enrollModal">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="closeModal('enrollModal')">&#10005;</button>
+    <div class="modal-title" id="enrollModalTitle">Enrollment Details</div>
+    <div class="modal-subtitle">Full enrollment information submitted by parent.</div>
+
+    <div class="enroll-detail-grid">
+      <div>
+        <div class="detail-group"><div class="detail-label">Child Name</div><div class="detail-value" id="em-childName">—</div></div>
+        <div class="detail-group"><div class="detail-label">Date of Birth</div><div class="detail-value" id="em-dob">—</div></div>
+        <div class="detail-group"><div class="detail-label">Age</div><div class="detail-value" id="em-age">—</div></div>
+        <div class="detail-group"><div class="detail-label">Sex</div><div class="detail-value" id="em-gender">—</div></div>
+        <div class="detail-group"><div class="detail-label">Address</div><div class="detail-value" id="em-address">—</div></div>
+      </div>
+      <div>
+        <div class="detail-group"><div class="detail-label">Emergency Contact</div><div class="detail-value" id="em-emergency">—</div></div>
+        <div class="detail-group"><div class="detail-label">Allergies</div><div class="detail-value" id="em-allergies">—</div></div>
+        <div class="detail-group"><div class="detail-label">Blood Type</div><div class="detail-value" id="em-blood">—</div></div>
+        <div class="detail-group"><div class="detail-label">Date Submitted</div><div class="detail-value" id="em-submitted">—</div></div>
+        <div class="detail-group"><div class="detail-label">Status</div><div class="detail-value" id="em-status">—</div></div>
+      </div>
+    </div>
+
+    <div id="em-assignBox" style="background:var(--blue-light);border-radius:10px;padding:14px 16px;margin-top:8px;">
+      <div class="detail-label" style="margin-bottom:8px;">Assign on Approval</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input id="em-childId" placeholder="Child ID (e.g. GH-2026-001)" style="flex:1; min-width:160px; padding:8px 10px; border:1px solid #BFDBFE; border-radius:8px;">
+        <select id="em-classSel" style="padding:8px 10px; border:1px solid #BFDBFE; border-radius:8px;">
+          <option>Nursery</option><option>Small Kids</option><option>Big Kids</option>
+        </select>
+        <select id="em-sessionSel" style="padding:8px 10px; border:1px solid #BFDBFE; border-radius:8px;">
+          <option>Morning</option><option>Afternoon</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('enrollModal')">Close</button>
+      <button class="action-btn btn-approve" id="em-approveBtn" style="padding:10px 20px;font-size:13px;" onclick="doApprove()">&#9989; Approve</button>
+      <button class="action-btn btn-reject" id="em-rejectBtn" style="padding:10px 20px;font-size:13px;" onclick="doReject()">&#10007; Reject</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PERFORMANCE DETAIL MODAL ══════════ -->
+<div class="modal-overlay" id="perfModal">
+  <div class="modal performance-edit-modal" style="position:relative;max-width:980px;width:96%;">
+    <button class="modal-close" onclick="closeModal('perfModal')">&#10005;</button>
+    <div class="modal-title" id="perfModalTitle">Performance Report</div>
+    <div class="modal-subtitle">Check the skills achieved for each evaluation. The total is counted automatically. The Final score is calculated only after all three evaluations are completed.</div>
+
+    <div class="performance-eval-toolbar">
+      <div>
+        <div class="form-label" style="margin-bottom:5px;">Development Area</div>
+        <select id="perfDomainSelect" class="filter-select performance-domain-select" onchange="renderPerformanceEditor()" aria-label="Select development area">
+          <option value="grossMotor">Gross Motor</option>
+          <option value="fineMotor">Fine Motor</option>
+          <option value="selfHelp">Self-Help</option>
+          <option value="receptiveLanguage">Receptive Language</option>
+          <option value="expressiveLanguage">Expressive Language</option>
+          <option value="cognitive">Cognitive</option>
+          <option value="socialEmotional">Social-Emotional</option>
+        </select>
+      </div>
+      <div class="performance-score-summary">
+        <div><span>1st Eval</span><strong id="evalTotal1">0</strong></div>
+        <div><span>2nd Eval</span><strong id="evalTotal2">0</strong></div>
+        <div><span>3rd Eval</span><strong id="evalTotal3">0</strong></div>
+        <div class="final-score-box"><span>Final</span><strong id="evalFinalTotal">0</strong></div>
+      </div>
+    </div>
+
+    <div class="performance-checklist-wrap">
+      <table class="performance-checklist-table">
+        <thead>
+          <tr>
+            <th class="check-no">No.</th>
+            <th id="perfDomainHeader">Gross Motor</th>
+            <th class="eval-head">1st Eval</th>
+            <th class="eval-head">2nd Eval</th>
+            <th class="eval-head">3rd Eval</th>
+            <th class="comment-head">Comments</th>
+          </tr>
+        </thead>
+        <tbody id="perfChecklistBody"></tbody>
+      </table>
+    </div>
+
+    <div class="checklist-total-row">
+      <div>TOTAL SCORE</div>
+      <div><span id="checkTotal1">0</span></div>
+      <div><span id="checkTotal2">0</span></div>
+      <div><span id="checkTotal3">0</span></div>
+      <div class="check-final-total"><span id="checkFinalTotal">0</span></div>
+    </div>
+
+    <div class="evaluation-completion-grid">
+      <label><input type="checkbox" id="evalComplete1" onchange="recalcChecklistTotals()"> 1st Evaluation completed</label>
+      <label><input type="checkbox" id="evalComplete2" onchange="recalcChecklistTotals()"> 2nd Evaluation completed</label>
+      <label><input type="checkbox" id="evalComplete3" onchange="recalcChecklistTotals()"> 3rd Evaluation completed</label>
+    </div>
+
+    <div class="section-title" style="font-size:14px;margin-top:18px;">Evaluation Comments</div>
+    <div class="eval-comment-group">
+      <label class="form-label">1st Evaluation Comment</label>
+      <textarea id="evalComment1" rows="2" placeholder="Improvements and performance notes for the 1st evaluation..." class="eval-textarea"></textarea>
+    </div>
+    <div class="eval-comment-group">
+      <label class="form-label">2nd Evaluation Comment</label>
+      <textarea id="evalComment2" rows="2" placeholder="Improvements and performance notes for the 2nd evaluation..." class="eval-textarea"></textarea>
+    </div>
+    <div class="eval-comment-group">
+      <label class="form-label">3rd Evaluation Comment</label>
+      <textarea id="evalComment3" rows="2" placeholder="Improvements and performance notes for the 3rd evaluation..." class="eval-textarea"></textarea>
+    </div>
+
+    <div class="section-title" style="font-size:14px;">Final Overall Comment</div>
+    <textarea id="finalCommentInput" rows="3" placeholder="Overall summary of the child's performance for the school year..." class="eval-textarea" style="margin-bottom:12px;"></textarea>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('perfModal')">Close</button>
+      <button class="print-btn" style="padding:10px 20px;font-size:13px;" onclick="savePerformance()">&#128190; Save Ratings &amp; Comments</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ LOGOUT MODAL ══════════ -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal" style="text-align:center;padding:40px 36px;">
+    <div style="font-size:52px;margin-bottom:14px;">&#128682;</div>
+    <div class="modal-title">Are you sure you want to log out?</div>
+    <div style="font-size:13px;color:var(--text-mid);margin:10px 0 26px;font-weight:600;">You will need to login again to access your account.</div>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-cancel" onclick="hideLogout()">Cancel</button>
+      <button class="btn-logout-confirm" onclick="confirmLogout()">Log Out</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ SCHOOL YEAR MODAL (advanced: exact end date) ══════════ -->
+<div class="modal-overlay" id="schoolYearModal">
+  <div class="modal" style="position:relative; max-width:420px;">
+    <button class="modal-close" onclick="closeModal('schoolYearModal')">&#10005;</button>
+    <div class="modal-title">&#128197; School Year Settings</div>
+    <div class="modal-subtitle">This applies across the whole system — dashboards, performance reports, and age calculations. Use the SY dropdown at the top of each page for a quick switch, or set an exact end date here.</div>
+
+    <div class="detail-group" style="margin-top:10px;">
+      <div class="detail-label">School Year Label</div>
+      <input id="sy-input-label" placeholder="e.g. 2026-2027" style="width:100%; padding:9px 11px; border:1px solid #BFDBFE; border-radius:8px; margin-top:4px;">
+    </div>
+    <div class="detail-group">
+      <div class="detail-label">End of School Year (used for age calculations)</div>
+      <input id="sy-input-end" type="date" style="width:100%; padding:9px 11px; border:1px solid #BFDBFE; border-radius:8px; margin-top:4px;">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('schoolYearModal')">Cancel</button>
+      <button class="action-btn btn-approve" style="padding:10px 20px;font-size:13px;" onclick="saveSchoolYear()">&#128190; Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script src="supabase.js"></script>
+<script src="db.js"></script>
+<script>
+// ---------- AUTH GUARD ----------
+const currentUser = DB.currentUser();
+if (!currentUser || currentUser.role !== 'admin') {
+  window.location.href = 'login.html';
+}
+
+let activeEnrollId = null; // currently open in enrollModal
+let activePerfChildId = null; // currently open in perfModal
+let currentPage = 'dashboard';
+let pageBusy = false;
+
+// ---------- SCHOOL YEAR QUICK-SWITCH DROPDOWN ----------
+// Range of selectable school years shown in every SY dropdown.
+const SY_YEAR_START = 2023;
+const SY_YEAR_END = 2032;
+
+function ensureSyDropdown(el, currentLabel) {
+  if (!el) return;
+  if (!el.dataset.populated) {
+    let opts = '';
+    for (let y = SY_YEAR_START; y <= SY_YEAR_END; y++) {
+      const val = y + '-' + (y + 1);
+      opts += '<option value="' + val + '">SY ' + y + '\u2013' + (y + 1) + '</option>';
+    }
+    el.innerHTML = opts;
+    el.dataset.populated = '1';
+  }
+  // If the currently-saved school year isn't in the pre-built range, add it so it still shows correctly.
+  const exists = Array.prototype.some.call(el.options, o => o.value === currentLabel);
+  if (currentLabel && !exists) {
+    const opt = document.createElement('option');
+    opt.value = currentLabel;
+    opt.textContent = 'SY ' + currentLabel.replace('-', '\u2013');
+    el.insertBefore(opt, el.firstChild);
+  }
+  if (currentLabel) el.value = currentLabel;
+}
+
+async function quickChangeSchoolYear(label) {
+  if (!label) return;
+  const parts = label.split('-');
+  const endYear = parseInt(parts[1], 10);
+  // Default end-of-school-year date; fine-tune the exact date anytime via the ⚙️ settings icon.
+  const endDate = endYear + '-03-31';
+  try {
+    await DB.setSchoolYear(label, endDate);
+  } catch (e) {
+    showToast('⚠️ Could not update the school year. Please try again.');
+    return;
+  }
+  showToast('📅 School year switched to SY ' + label.replace('-', '\u2013') + '.');
+  await renderCurrentPage();
+}
+
+async function navigate(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentPage = page;
+  closeSidebar();
+  await renderCurrentPage();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+
+function showLogout() { document.getElementById('logoutModal').classList.add('show'); }
+function hideLogout() { document.getElementById('logoutModal').classList.remove('show'); }
+function confirmLogout() {
+  hideLogout();
+  DB.logout();
+  showToast('Logged out successfully. Goodbye!');
+  setTimeout(() => window.location.href = 'login.html', 800);
+}
+
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+/* ---------------- RENDERING ---------------- */
+
+function childDisplayName(rec) {
+  return rec.firstName + ' ' + (rec.middleName ? rec.middleName + ' ' : '') + rec.lastName;
+}
+
+function statusBadge(status) {
+  if (status === 'approved') return '<span class="badge badge-approved">✅ Approved</span>';
+  if (status === 'rejected') return '<span class="badge badge-rejected">✗ Rejected</span>';
+  return '<span class="badge badge-pending">⏳ Pending</span>';
+}
+
+// Numeric rating display (replaces the old star rating)
+function numberFor(n) {
+  return '<span class="rating-num">' + (n || 0).toFixed(1) + '</span>';
+}
+
+async function renderCurrentPage() {
+  if (pageBusy) return;
+  pageBusy = true;
+  try {
+    const all = await DB.getAllEnrollments();
+    const approvedAll = all.filter(r => r.status === 'approved');
+    if (currentPage === 'dashboard') {
+      await Promise.all([renderStatCards(all, approvedAll), renderDashboard(all), renderPerfOverview(approvedAll), renderDomainAverageChart(approvedAll)]);
+    } else if (currentPage === 'enrollment') {
+      renderStatCardsBasic(all);
+      renderEnrollTable(all);
+    } else if (currentPage === 'performance') {
+      await renderPerfTable(approvedAll);
+    } else if (currentPage === 'age-calc') {
+      await renderAgeCalc(approvedAll);
+    } else if (currentPage === 'print') {
+      await renderPrintTable(approvedAll);
+    } else if (currentPage === 'manage-accounts') {
+      await renderParentAccounts();
+    }
+    const syRaw = await DB.getSchoolYear();
+    const sy = (syRaw || '').replace(/\u2013/g, '-');
+    ['syBadgeWrap1', 'syBadgeWrap2', 'ageCalcSyWrap', 'syBadgeWrap3'].forEach(id => ensureSyDropdown(document.getElementById(id), sy));
+  } finally {
+    pageBusy = false;
+  }
+}
+
+async function renderAll() {
+  await renderCurrentPage();
+}
+
+function renderStatCardsBasic(all) {
+  const approved = all.filter(r => r.status === 'approved');
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  setText('statTotal', all.length);
+  setText('statPending', all.filter(r => r.status === 'pending').length);
+  setText('statApproved', approved.length);
+  setText('statMorning', approved.filter(r => r.session === 'Morning').length);
+  setText('statAfternoon', approved.filter(r => r.session === 'Afternoon').length);
+  setText('countAll', all.length);
+  setText('countPending', all.filter(r => r.status === 'pending').length);
+  setText('countApproved', approved.length);
+  setText('countRejected', all.filter(r => r.status === 'rejected').length);
+}
+
+/* ---------------- SCHOOL YEAR SETTINGS (advanced modal) ---------------- */
+
+async function openSchoolYearModal() {
+  const info = await DB.getSchoolYearInfo();
+  document.getElementById('sy-input-label').value = info.schoolYear || '';
+  document.getElementById('sy-input-end').value = info.schoolYearEnd || '';
+  showModal('schoolYearModal');
+}
+
+async function saveSchoolYear() {
+  const label = document.getElementById('sy-input-label').value.trim();
+  const endDate = document.getElementById('sy-input-end').value;
+
+  if (!label || !endDate) {
+    showToast('Please fill in both the school year label and end date.');
+    return;
+  }
+
+  try {
+    await DB.setSchoolYear(label, endDate);
+  } catch (e) {
+    showToast('Could not update the school year. Please try again.');
+    return;
+  }
+
+  closeModal('schoolYearModal');
+  showToast('School year updated to SY ' + label + '.');
+  await renderCurrentPage();
+}
+
+async function renderStatCards(all, approvedAll) {
+  const pending = all.filter(r => r.status === 'pending').length;
+  const rejected = all.filter(r => r.status === 'rejected').length;
+  const morning = approvedAll.filter(r => r.session === 'Morning').length;
+  const afternoon = approvedAll.filter(r => r.session === 'Afternoon').length;
+
+  const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  // Dashboard stat cards
+  setText('statTotal', all.length);
+  setText('statPending', pending);
+  setText('statApproved', approvedAll.length);
+  setText('statMorning', morning);
+  setText('statAfternoon', afternoon);
+
+  // Enrollment page tab counts
+  setText('countAll', all.length);
+  setText('countPending', pending);
+  setText('countApproved', approvedAll.length);
+  setText('countRejected', rejected);
+
+  // Performance page summary
+  let overallSum = 0, outstandingCount = 0;
+  for (const r of approvedAll) {
+    const cid = r.childId || r.id;
+    const perf = await DB.getPerformance(cid);
+    const finals = perf.domains.map(d => getDomainNormalizedValue(perf, d));
+    const avg = finals.reduce((s, v) => s + v, 0) / (finals.length || 1);
+    overallSum += avg;
+    if (avg >= 4.5) outstandingCount++;
+  }
+  setText('statOverallAvg', approvedAll.length ? (overallSum / approvedAll.length).toFixed(1) : '0.0');
+  setText('statChildrenAssessed', approvedAll.length);
+  setText('statOutstanding', outstandingCount);
+}
+
+async function renderPerfOverview(approvedAll) {
+  const grid = document.getElementById('perfOverviewGrid');
+  if (!grid) return;
+  const domainNames = [
+    'Gross Motor Domain', 'Fine Motor Domain', 'Self-Help Domain',
+    'Receptive Language Domain', 'Expressive Language Domain',
+    'Cognitive Domain', 'Social-Emotional Domain'
+  ];
+
+  if (!approvedAll.length) {
+    grid.innerHTML = '<div style="color:var(--text-light); grid-column:1/-1;">No enrolled children yet — averages will appear once students are approved and rated.</div>';
+    return;
+  }
+
+  const totals = domainNames.map(() => 0);
+  const perfs = await Promise.all(approvedAll.map(r => DB.getPerformance(r.childId || r.id)));
+  perfs.forEach(perf => perf.domains.forEach((d, i) => { totals[i] += getDomainNormalizedValue(perf, d); }));
+
+  grid.innerHTML = domainNames.map((name, i) => {
+    const avg = totals[i] / approvedAll.length;
+    return '<div class="perf-overview-card">' +
+      '<div class="perf-overview-area">' + name.toUpperCase() + '</div>' +
+      '<div class="perf-overview-avg">' + avg.toFixed(1) + '</div></div>';
+  }).join('');
+}
+
+async function renderDomainAverageChart(approvedAll) {
+  const canvas = document.getElementById('domainAverageChart');
+  const empty = document.getElementById('domainAverageChartEmpty');
+  if (!canvas) return;
+
+  if (window.domainAverageChart && typeof window.domainAverageChart.destroy === 'function') {
+    window.domainAverageChart.destroy();
+    window.domainAverageChart = null;
+  }
+
+  if (!approvedAll.length) {
+    canvas.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+
+  const domainNames = [
+    'Gross Motor', 'Fine Motor', 'Self-Help',
+    'Receptive Language', 'Expressive Language',
+    'Cognitive', 'Social-Emotional'
+  ];
+  const totals = domainNames.map(() => 0);
+  const perfs = await Promise.all(approvedAll.map(r => DB.getPerformance(r.childId || r.id)));
+  perfs.forEach(perf => (perf.domains || []).forEach((d, i) => {
+    if (i < totals.length) totals[i] += getDomainFinalValue(perf, d, i);
+  }));
+
+  // Plot the actual final score, not a percentage and not a 0–5 normalization.
+  // Example: a Gross Motor average of 13.3 is plotted at exactly 13.3 on the
+  // 0–100 scale. The scale is simply made taller so larger domains can be shown.
+  const averages = totals.map(total => Number((total / approvedAll.length).toFixed(2)));
+  canvas.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+
+  const styles = getComputedStyle(document.documentElement);
+  const accent = styles.getPropertyValue('--blue').trim() || '#2563EB';
+  const text = styles.getPropertyValue('--text-mid').trim() || '#475569';
+  const grid = 'rgba(148, 163, 184, 0.22)';
+
+  window.domainAverageChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: domainNames,
+      datasets: [{
+        label: 'Average Rating',
+        data: averages,
+        borderColor: accent,
+        backgroundColor: accent,
+        pointBackgroundColor: accent,
+        pointBorderColor: '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        borderWidth: 3,
+        tension: 0.25,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(context) { return ' Average Rating: ' + Number(context.parsed.y).toFixed(1); }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: text, font: { family: 'Nunito', size: 11, weight: '700' }, maxRotation: 0, autoSkip: false }
+        },
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { stepSize: 20, color: text, font: { family: 'Nunito', size: 11, weight: '700' } },
+          title: { display: true, text: 'Average Rating', color: text, font: { family: 'Nunito', size: 11, weight: '700' } },
+          grid: { color: grid }
+        }
+      }
+    }
+  });
+}
+
+function goToEnrollFiltered(status, session) {
+  navigate('enrollment', document.querySelector('.nav-item[onclick*="enrollment"]'));
+  enrollFilter = status || 'all';
+  document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  const btnMap = { all: 0, pending: 1, approved: 2, rejected: 3 };
+  const btns = document.querySelectorAll('#page-enrollment .tab-btn');
+  if (btns[btnMap[enrollFilter]]) btns[btnMap[enrollFilter]].classList.add('active');
+  document.getElementById('enrollClassFilter').value = session || '';
+  document.getElementById('enrollSearch').value = '';
+  renderCurrentPage();
+}
+
+function onSearchChange() { renderCurrentPage(); }
+function onClassFilterChange() { renderCurrentPage(); }
+
+function renderDashboard(all) {
+  const recent = all.slice(-6).reverse();
+  const body = document.getElementById('dashRecentBody');
+  if (!body) return;
+  if (!recent.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light);">No enrollment submissions yet.</td></tr>'; return; }
+  body.innerHTML = recent.map(r => {
+    const age = DB.calculateAge(r.dob);
+    const actionCell = r.status === 'pending'
+      ? '<button class="action-btn btn-approve" onclick="openEnroll(\'' + r.id + '\')">✓ Review</button>'
+      : '<button class="action-btn btn-view" onclick="openEnroll(\'' + r.id + '\')">👁 View</button>';
+    return '<tr><td><span class="child-avatar-sm">👶</span>' + childDisplayName(r) + '</td>' +
+      '<td>' + age.years + ' yrs</td><td>' + (r.classSection || 'TBD') + '</td>' +
+      '<td>' + new Date(r.submittedAt).toLocaleDateString() + '</td>' +
+      '<td>' + statusBadge(r.status) + '</td><td>' + actionCell + '</td></tr>';
+  }).join('');
+}
+
+let enrollFilter = 'all';
+function renderEnrollTable(all) {
+  const body = document.getElementById('enrollTableBody');
+  if (!body) return;
+
+  let rows = enrollFilter === 'all' ? all : all.filter(r => r.status === enrollFilter);
+
+  const classVal = (document.getElementById('enrollClassFilter') || {}).value;
+  if (classVal) rows = rows.filter(r => r.session === classVal);
+
+  const searchVal = ((document.getElementById('enrollSearch') || {}).value || '').trim().toLowerCase();
+  if (searchVal) rows = rows.filter(r => childDisplayName(r).toLowerCase().includes(searchVal));
+
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-light);">No records found.</td></tr>'; return; }
+  body.innerHTML = rows.map((r, i) => {
+    const age = DB.calculateAge(r.dob);
+    let actions = '<button class="action-btn btn-view" onclick="openEnroll(\'' + r.id + '\')">👁 View</button>';
+    if (r.status === 'pending') {
+      actions += '<button class="action-btn btn-approve" onclick="openEnroll(\'' + r.id + '\')">✓ Review</button>';
+    }
+    return '<tr data-status="' + r.status + '">' +
+      '<td>' + String(i + 1).padStart(3, '0') + '</td>' +
+      '<td><span class="child-avatar-sm">👶</span>' + childDisplayName(r) + '</td>' +
+      '<td>' + age.years + ' yrs</td>' +
+      '<td>' + (r.classSection || 'TBD') + (r.session ? ' (' + r.session + ')' : '') + '</td>' +
+      '<td>' + r.emName + '</td>' +
+      '<td>' + r.emPhone + '</td>' +
+      '<td>' + new Date(r.submittedAt).toLocaleDateString() + '</td>' +
+      '<td>' + statusBadge(r.status) + '</td>' +
+      '<td>' + actions + '</td></tr>';
+  }).join('');
+}
+
+async function renderAgeCalc(approved) {
+  const body = document.getElementById('ageCalcBody');
+  if (!body) return;
+  if (!approved.length) { body.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-light);">No enrolled children yet.</td></tr>'; return; }
+  const rowsHtml = await Promise.all(approved.map(async r => {
+    const age = DB.calculateAge(r.dob);
+    const ageEnd = await DB.ageAtEndOfSchoolYear(r.dob);
+    return '<tr><td><span class="child-avatar-sm">👶</span>' + childDisplayName(r) + '</td>' +
+      '<td>' + (r.childId || '—') + '</td><td>' + (r.classSection || 'TBD') + '</td>' +
+      '<td>' + r.dob + '</td><td>' + age.years + 'y ' + age.months + 'm ' + age.days + 'd</td>' +
+      '<td><strong>' + ageEnd.years + 'y ' + ageEnd.months + 'm</strong></td></tr>';
+  }));
+  body.innerHTML = rowsHtml.join('');
+}
+
+function applyClassAndSearch(rows, classFilterId, searchId) {
+  const classVal = (document.getElementById(classFilterId) || {}).value;
+  if (classVal) rows = rows.filter(r => r.session === classVal);
+  const searchVal = ((document.getElementById(searchId) || {}).value || '').trim().toLowerCase();
+  if (searchVal) rows = rows.filter(r => childDisplayName(r).toLowerCase().includes(searchVal));
+  return rows;
+}
+
+function getDomainChecklistKey(domain) {
+  const name = (domain && domain.name || '').toLowerCase();
+  if (name.includes('gross motor')) return 'grossMotor';
+  if (name.includes('fine motor')) return 'fineMotor';
+  if (name.includes('self-help') || name.includes('self help')) return 'selfHelp';
+  if (name.includes('receptive language')) return 'receptiveLanguage';
+  if (name.includes('expressive language')) return 'expressiveLanguage';
+  if (name.includes('cognitive')) return 'cognitive';
+  if (name.includes('social-emotional') || name.includes('social emotional')) return 'socialEmotional';
+  return null;
+}
+
+function getDomainFinalValue(perf, domain, index) {
+  const key = getDomainChecklistKey(domain);
+  if (key && perf.checklists && perf.checklists[key]) {
+    const checklist = perf.checklists[key];
+    const items = checklist.items || [];
+    const t1 = items.filter(x => x.e1).length;
+    const t2 = items.filter(x => x.e2).length;
+    const t3 = items.filter(x => x.e3).length;
+    const done = checklist.completed && checklist.completed.e1 && checklist.completed.e2 && checklist.completed.e3;
+    return done ? (t1 + t2 + t3) : 0;
+  }
+  return ((Number(domain.e1) + Number(domain.e2) + Number(domain.e3)) / 3) || 0;
+}
+
+function getDomainNormalizedValue(perf, domain) {
+  const key = getDomainChecklistKey(domain);
+  if (key && perf.checklists && perf.checklists[key]) {
+    const config = PERFORMANCE_CHECKLISTS[key];
+    const final = getDomainFinalValue(perf, domain);
+    return config && config.items.length ? (final / config.items.length * 5) : 0;
+  }
+  return ((Number(domain.e1) + Number(domain.e2) + Number(domain.e3)) / 3) || 0;
+}
+
+async function renderPerfTable(approved) {
+  const body = document.getElementById('perfTableBody');
+  if (!body) return;
+  const rows = applyClassAndSearch(approved, 'perfClassFilter', 'perfSearch');
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-light);">No enrolled children yet.</td></tr>'; return; }
+  const rowsHtml = await Promise.all(rows.map(async r => {
+    const cid = r.childId || r.id;
+    const perf = await DB.getPerformance(cid);
+    const finals = perf.domains.map(d => getDomainFinalValue(perf, d));
+    const normalized = perf.domains.map(d => getDomainNormalizedValue(perf, d));
+    const overallAvg = (normalized.reduce((s, v) => s + v, 0) / normalized.length || 0).toFixed(1);
+    return '<tr><td><span class="child-avatar-sm">👶</span>' + childDisplayName(r) + '</td><td>' + (r.classSection || 'TBD') + '</td>' +
+      finals.map((f, i) => '<td>' + (i === 0 ? numberFor(f) : numberFor(f)) + '</td>').join('') +
+      '<td><span class="rating-badge">' + overallAvg + '</span></td>' +
+      '<td><button class="action-btn btn-view performance-edit-btn" onclick="openPerf(\'' + cid + '\',\'' + childDisplayName(r).replace(/'/g,"") + '\')">✏️ Edit</button></td></tr>';
+  }));
+  body.innerHTML = rowsHtml.join('');
+}
+
+async function renderPrintTable(approved) {
+  const body = document.getElementById('printTableBody');
+  if (!body) return;
+  const rows = applyClassAndSearch(approved, 'printClassFilter', 'printSearch');
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);">No enrolled children yet.</td></tr>'; return; }
+  const rowsHtml = await Promise.all(rows.map(async r => {
+    const cid = r.childId || r.id;
+    const perf = await DB.getPerformance(cid);
+    const normalized = perf.domains.map(d => getDomainNormalizedValue(perf, d));
+    const overallAvg = (normalized.reduce((s, v) => s + v, 0) / normalized.length || 0).toFixed(1);
+    return '<tr><td><span class="child-avatar-sm">👶</span>' + childDisplayName(r) + '</td><td>' + (r.classSection || 'TBD') + '</td>' +
+      '<td><span class="rating-badge">' + overallAvg + '</span></td>' +
+      '<td><span class="badge badge-enrolled">👶 Enrolled</span></td>' +
+      '<td><button class="action-btn btn-print" onclick="handlePrintChild(\'' + cid + '\')">🖨️ Print</button></td></tr>';
+  }));
+  body.innerHTML = rowsHtml.join('');
+}
+
+/* ---------------- MANAGE ACCOUNTS ---------------- */
+
+async function renderParentAccounts() {
+  const body = document.getElementById('parentAccountsBody');
+  if (!body) return;
+
+  if (typeof DB.getAllParents !== 'function') {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#991B1B;font-weight:700;">⚠️ Your db.js file is out of date (missing getAllParents). Please replace db.js with the latest version and refresh.</td></tr>';
+    return;
+  }
+
+  const parents = await DB.getAllParents();
+  const allEnroll = await DB.getAllEnrollments();
+
+  if (!parents.length) {
+    body.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-light);">No parent accounts registered yet.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = parents.map(p => {
+    const enrollment = allEnroll.find(e => e.parentUsername === p.username);
+    const linkedChild = enrollment ? childDisplayName(enrollment) + ' (' + enrollment.status + ')' : '<span style="color:var(--text-light);">No enrollment yet</span>';
+    return '<tr>' +
+      '<td>' + p.fullName + '</td>' +
+      '<td>' + p.username + '</td>' +
+      '<td>' + p.email + '</td>' +
+      '<td>' + (p.contact || '—') + '</td>' +
+      '<td>' + linkedChild + '</td>' +
+      '<td>' + new Date(p.createdAt).toLocaleDateString() + '</td>' +
+      '<td><button class="action-btn btn-reject" onclick="confirmDeleteParent(\'' + p.username + '\',\'' + p.fullName.replace(/'/g,"") + '\')">&#128465;&#65039; Delete</button></td></tr>';
+  }).join('');
+}
+
+async function confirmDeleteParent(username, fullName) {
+  const sure = confirm('Delete the account for "' + fullName + '" (' + username + ')?\n\nThis will permanently remove their account, enrollment record, performance data, and comments. This cannot be undone.');
+  if (!sure) return;
+  const result = await DB.deleteParentAccount(username);
+  if (!result.ok) { showToast('⚠️ ' + result.error); return; }
+  showToast('🗑️ Account for ' + fullName + ' has been deleted.');
+  renderCurrentPage();
+}
+
+/* ---------------- ENROLLMENT DETAIL / APPROVE / REJECT ---------------- */
+
+async function openEnroll(id) {
+  const rec = (await DB.getAllEnrollments()).find(r => r.id === id);
+  if (!rec) return;
+  activeEnrollId = id;
+  const age = DB.calculateAge(rec.dob);
+  document.getElementById('enrollModalTitle').textContent = 'Enrollment Details – ' + childDisplayName(rec);
+  document.getElementById('em-childName').textContent = childDisplayName(rec);
+  document.getElementById('em-dob').textContent = rec.dob;
+  document.getElementById('em-age').textContent = age.years + 'y ' + age.months + 'm';
+  document.getElementById('em-gender').textContent = rec.gender;
+  document.getElementById('em-address').textContent = rec.childAddress;
+  document.getElementById('em-emergency').textContent = rec.emName + ' (' + rec.emRelationship + ') — ' + rec.emPhone;
+  document.getElementById('em-allergies').textContent = rec.allergies || 'None reported';
+  document.getElementById('em-blood').textContent = rec.bloodType || 'Unknown';
+  document.getElementById('em-submitted').textContent = new Date(rec.submittedAt).toLocaleString();
+  document.getElementById('em-status').textContent = rec.status;
+
+  const assignBox = document.getElementById('em-assignBox');
+  const approveBtn = document.getElementById('em-approveBtn');
+  const rejectBtn = document.getElementById('em-rejectBtn');
+  if (rec.status === 'pending') {
+    assignBox.style.display = 'block';
+    document.getElementById('em-childId').value = 'GH-' + new Date().getFullYear() + '-' + String((await DB.getAllEnrollments()).filter(r=>r.status==='approved').length + 1).padStart(3,'0');
+    approveBtn.style.display = 'inline-flex';
+    rejectBtn.style.display = 'inline-flex';
+  } else {
+    assignBox.style.display = 'none';
+    approveBtn.style.display = 'none';
+    rejectBtn.style.display = 'none';
+  }
+  showModal('enrollModal');
+}
+
+async function doApprove() {
+  const childId = document.getElementById('em-childId').value.trim();
+  const classSection = document.getElementById('em-classSel').value;
+  const session = document.getElementById('em-sessionSel').value;
+  if (!childId) { showToast('⚠️ Please enter a Child ID.'); return; }
+  await DB.approveEnrollment(activeEnrollId, { childId, classSection, session });
+  showToast('✅ Enrollment approved! Child ID ' + childId + ' assigned.');
+  closeModal('enrollModal');
+  renderCurrentPage();
+}
+
+async function doReject() {
+  const reason = prompt('Reason for rejecting this enrollment:', 'Incomplete requirements');
+  if (reason === null) return;
+  await DB.rejectEnrollment(activeEnrollId, reason);
+  showToast('❌ Enrollment rejected.');
+  closeModal('enrollModal');
+  renderCurrentPage();
+}
+
+function filterEnroll(status, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  enrollFilter = status;
+  DB.getAllEnrollments().then(renderEnrollTable);
+}
+
+/* ---------------- PERFORMANCE EDIT ---------------- */
+const PERFORMANCE_CHECKLISTS = {
+  grossMotor: {
+    label: 'Gross Motor',
+    storageKey: 'grossMotor',
+    items: [
+      'Climbs on chair or other elevated furniture like a bed without help',
+      'Walks backwards',
+      'Runs without tripping or falling',
+      'Walks down stairs, two feet on each step, with one hand held',
+      'Walks upstairs holding onto a handrail, two feet on each step',
+      'Walks upstairs with alternate feet without holding onto a handrail',
+      'Walks downstairs with alternate feet without holding onto a handrail',
+      'Moves body part as directed',
+      'Jumps up',
+      'Throws ball overhead with direction',
+      'Hops one to three steps on preferred foot',
+      'Jumps and turns',
+      'Dances patterns/joins group movement activities'
+    ]
+  },
+  fineMotor: {
+    label: 'Fine Motor',
+    storageKey: 'fineMotor',
+    items: [
+      'Uses all five fingers to get food/toys placed on a flat surface',
+      'Picks up objects with thumb and index finger',
+      'Displays a definite hand preference',
+      'Puts small objects in/out of containers',
+      'Holds crayon with all the fingers of his hand making a fist (i.e., palmar grasp)',
+      'Unscrews the lid of a container or unwraps food',
+      'Scribbles spontaneously',
+      'Scribbles vertical and horizontal lines',
+      'Draws circle purposeful',
+      'Draws a human figure (head, eyes, trunk, arms, hands/fingers)',
+      'Draws a house using geometric forms'
+    ]
+  },
+  selfHelp: {
+    label: 'Self-Help',
+    storageKey: 'selfHelp',
+    sections: [
+      { label: 'Feeding sub-domain', start: 0, end: 13 },
+      { label: 'Dressing sub-domain', start: 13, end: 18 },
+      { label: 'Toilet Training sub-domain', start: 18, end: 23 },
+      { label: 'Bathing sub-domain', start: 23, end: 27 }
+    ],
+    items: [
+      'Feeds self with finger food (e.g. biscuits, bread) using fingers',
+      'Feeds self using fingers to eat rice/hands with spillage',
+      'Feeds self using spoon with spillage',
+      'Feeds self using fingers without spillage',
+      'Feeds self using spoon without spillage',
+      'Eats without need for spoonfeeding during any meal',
+      'Helps hold cup for drinking',
+      'Drinks from cup with spillage',
+      'Drinks from cup unassisted',
+      'Gets drink for self unassisted',
+      'Pours from pitcher without spillage',
+      'Prepares own food/snack',
+      'Prepares meals for younger siblings/family members when no adult is around',
+      'Participates when being dressed (e.g., raises arms or lifts leg)',
+      'Pulls down gartered short pants',
+      'Removes sando',
+      'Dresses without assistance except for buttons and tying',
+      'Dresses without assistance including buttons and tying',
+      'Informs the adult only after he has already urinated or moved bowels',
+      'Informs the adult of need to urinate or move bowels',
+      'Goes to designated place but sometimes still does this in underpants',
+      'Goes to designated place and never does this in underpants anymore',
+      'Wipes/cleans self after a bowel movement',
+      'Participates when bathing (e.g., rubbing arms with soap)',
+      'Washes and dries hands without any help',
+      'Washes face without any help',
+      'Bathes without any help'
+    ]
+  },
+  receptiveLanguage: {
+    label: 'Receptive Language',
+    storageKey: 'receptiveLanguage',
+    items: [
+      'Points to a family member when asked to do so',
+      'Points to five body parts on himself when asked to do so',
+      'Points to five named pictured objects when asked to do so',
+      'Follows one-step instructions that include simple prepositions (e.g., in, on, under, etc.)',
+      'Follows two-step instructions that include simple prepositions'
+    ]
+  },
+  expressiveLanguage: {
+    label: 'Expressive Language',
+    storageKey: 'expressiveLanguage',
+    items: [
+      'Uses five to 20 recognizable words',
+      'Uses pronouns (e.g. I, me, ako, akin)',
+      "Uses two- to three-word verb-noun combinations (e.g., 'bingi' gatas)",
+      'Names objects in pictures',
+      'Speaks in grammatically correct two- to three-word sentences',
+      'Asks "what" questions',
+      'Asks "who" and "why" questions',
+      'Gives account of recent experiences (with prompting) in order of occurrence using past tense'
+    ]
+  },
+  cognitive: {
+    label: 'Cognitive',
+    storageKey: 'cognitive',
+    items: [
+      'Looks in the direction of fallen object',
+      'Looks for a partially hidden object',
+      'Imitates behavior just seen a few minutes earlier',
+      'Offers an object but will not release it',
+      'Looks for a completely hidden object',
+      "Exhibits simple 'pretend' play (feeds, put doll to sleep)",
+      'Matches objects',
+      'Matches two to three colors',
+      'Matches pictures',
+      'Sorts based on shapes',
+      'Sorts objects based on two attributes (e.g., size and color)',
+      'Arranges objects according to size from smallest to biggest',
+      'Names four to six colors',
+      'Copies shapes',
+      'Names 3 animals or vegetables when asked',
+      'States what common household items are used for',
+      'Can assemble simple puzzles',
+      'Demonstrates an understanding of opposites by completing a statement',
+      'Points to left and right sides of body',
+      'Can state what is silly or wrong with pictures',
+      'Matches upper case letters, and matches lower case letters'
+    ]
+  },
+  socialEmotional: {
+    label: 'Social-Emotional',
+    storageKey: 'socialEmotional',
+    items: [
+      'Enjoys watching activities of nearby people or animals',
+      'Friendly with strangers but initially may show slight anxiety or shyness',
+      'Plays alone but likes to be near familiar adults or brothers and sisters',
+      'Laughs or squeals aloud in play',
+      'Plays peek-a-boo (bulaga)',
+      'Rolls ball interactively with caregiver/teammate',
+      'Hugs or cuddles toys',
+      'Demonstrates respect for elders using terms like "po" and "opo"',
+      'Shares toys with others',
+      'Imitates adult activities (e.g., cooking, washing)',
+      'Identifies feelings in others',
+      'Appropriately uses cultural gestures of greeting without much prompting (e.g., mano, bless, kiss, etc.)',
+      'Comforts playmates/siblings in distress',
+      'Persists when faced with a problem or obstacle to his wants',
+      'Helps with family chores (e.g., wiping tables, watering plants, etc.)',
+      'Curious about environment but knows when to stop asking questions of adults',
+      'Waits for his turn',
+      'Asks permission to play with toy being used by another',
+      'Defends possessions with determination',
+      'Plays organized group games fairly (e.g., does not cheat to win)',
+      'Can talk about complex feelings (e.g., anger, sadness, worry) he experiences',
+      'Honors a simple bargain with caregiver (e.g., plays outside only after cleaning/fixing his/her room)',
+      'Watches responsibly over younger siblings/family members',
+      'Cooperates with adults and peers in group situations to minimize quarrels and conflicts'
+    ]
+  }
+};
+
+function getSelectedPerformanceDomain() {
+  const select = document.getElementById('perfDomainSelect');
+  return (select && PERFORMANCE_CHECKLISTS[select.value]) ? select.value : 'grossMotor';
+}
+
+function getChecklistForDomain(perf, domainKey) {
+  const config = PERFORMANCE_CHECKLISTS[domainKey];
+  const saved = perf.checklists && perf.checklists[config.storageKey];
+  return {
+    _saved: !!saved,
+    _dirty: false,
+    items: config.items.map((name, i) => ({
+      name,
+      e1: !!(saved && saved.items && saved.items[i] && saved.items[i].e1),
+      e2: !!(saved && saved.items && saved.items[i] && saved.items[i].e2),
+      e3: !!(saved && saved.items && saved.items[i] && saved.items[i].e3),
+      comment: saved && saved.items && saved.items[i] ? (saved.items[i].comment || '') : ''
+    })),
+    completed: {
+      e1: !!(saved && saved.completed && saved.completed.e1),
+      e2: !!(saved && saved.completed && saved.completed.e2),
+      e3: !!(saved && saved.completed && saved.completed.e3)
+    }
+  };
+}
+
+// Backward-compatible helpers retained for any existing code.
+function getGrossMotorChecklist(perf) { return getChecklistForDomain(perf, 'grossMotor'); }
+
+async function openPerf(childId, name) {
+  activePerfChildId = childId;
+  document.getElementById('perfModalTitle').textContent = 'Performance Report – ' + name;
+  const perf = await DB.getPerformance(childId);
+
+  // Keep each developmental area's comments separate. This prevents a Gross
+  // Motor comment from appearing when Fine Motor is selected (and vice versa).
+  window.activePerformanceComments = {};
+  const savedDomainComments = perf.domainComments || {};
+  Object.keys(PERFORMANCE_CHECKLISTS).forEach(domainKey => {
+    const saved = savedDomainComments[domainKey] || {};
+    window.activePerformanceComments[domainKey] = {
+      e1: saved.e1 || '',
+      e2: saved.e2 || '',
+      e3: saved.e3 || '',
+      final: saved.final || ''
+    };
+  });
+
+  // Backward compatibility: if domain-specific comments do not exist yet,
+  // load the old general comments into Gross Motor only.
+  if (!perf.domainComments && perf.evalComments) {
+    window.activePerformanceComments.grossMotor = {
+      e1: perf.evalComments.e1 || '',
+      e2: perf.evalComments.e2 || '',
+      e3: perf.evalComments.e3 || '',
+      final: perf.finalComment || ''
+    };
+  }
+
+  document.getElementById('perfDomainSelect').value = 'grossMotor';
+  window.activePerformanceChecklists = {};
+  Object.keys(PERFORMANCE_CHECKLISTS).forEach(domainKey => {
+    window.activePerformanceChecklists[domainKey] = getChecklistForDomain(perf, domainKey);
+  });
+  renderPerformanceEditor();
+  showModal('perfModal');
+}
+
+function getActiveChecklist() {
+  const domainKey = getSelectedPerformanceDomain();
+  if (!window.activePerformanceChecklists) window.activePerformanceChecklists = {};
+  if (!window.activePerformanceChecklists[domainKey]) {
+    window.activePerformanceChecklists[domainKey] = { items: [], completed: {e1:false,e2:false,e3:false} };
+  }
+  return window.activePerformanceChecklists[domainKey];
+}
+
+function renderPerformanceEditor() {
+  const body = document.getElementById('perfChecklistBody');
+  if (!body) return;
+  const domainKey = getSelectedPerformanceDomain();
+  const config = PERFORMANCE_CHECKLISTS[domainKey];
+  const checklist = getActiveChecklist();
+  const header = document.getElementById('perfDomainHeader');
+  if (header) header.textContent = config.label;
+
+  const sections = config.sections || [];
+  body.innerHTML = checklist.items.map((item, i) => {
+    const section = sections.find(sec => sec.start === i);
+    const sectionRow = section ? ('<tr class="checklist-section-row"><td></td><td colspan="5">' + escapeHtml(section.label) + '</td></tr>') : '';
+    return sectionRow + '<tr>' +
+      '<td class="check-no">' + (i + 1) + '</td>' +
+      '<td class="skill-name">' + escapeHtml(item.name) + '</td>' +
+      ['e1','e2','e3'].map(e =>
+        '<td class="check-cell"><label class="skill-check" title="Mark as achieved"><input type="checkbox" data-index="' + i + '" data-eval="' + e + '" ' + (item[e] ? 'checked' : '') + ' onchange="toggleChecklistMark(' + i + ',\'' + e + '\',this.checked)"><span class="check-mark">✓</span></label></td>'
+      ).join('') +
+      '<td class="comment-cell"><input type="text" class="skill-comment" data-index="' + i + '" value="' + escapeAttr(item.comment) + '" placeholder="Comment..." oninput="updateChecklistComment(' + i + ',this.value)"></td>' +
+      '</tr>';
+  }).join('');
+
+  const completed = checklist.completed || {};
+  document.getElementById('evalComplete1').checked = !!completed.e1;
+  document.getElementById('evalComplete2').checked = !!completed.e2;
+  document.getElementById('evalComplete3').checked = !!completed.e3;
+
+  // Show comments belonging only to the selected Development Area.
+  const domainComments = (window.activePerformanceComments && window.activePerformanceComments[domainKey]) || {e1:'',e2:'',e3:'',final:''};
+  document.getElementById('evalComment1').value = domainComments.e1 || '';
+  document.getElementById('evalComment2').value = domainComments.e2 || '';
+  document.getElementById('evalComment3').value = domainComments.e3 || '';
+  document.getElementById('finalCommentInput').value = domainComments.final || '';
+  recalcChecklistTotals();
+}
+
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(value) { return escapeHtml(value); }
+
+function toggleChecklistMark(index, evalKey, checked) {
+  const checklist = getActiveChecklist();
+  if (!checklist.items[index]) return;
+  checklist.items[index][evalKey] = checked;
+  checklist._dirty = true;
+  recalcChecklistTotals();
+}
+
+function updateChecklistComment(index, value) {
+  const checklist = getActiveChecklist();
+  if (!checklist.items[index]) return;
+  checklist.items[index].comment = value;
+  checklist._dirty = true;
+}
+
+function countChecklist(evalKey) {
+  const checklist = getActiveChecklist();
+  return checklist.items.reduce((total, item) => total + (item[evalKey] ? 1 : 0), 0);
+}
+
+function recalcChecklistTotals() {
+  const checklist = getActiveChecklist();
+  const t1 = countChecklist('e1');
+  const t2 = countChecklist('e2');
+  const t3 = countChecklist('e3');
+  const c1 = document.getElementById('evalComplete1') && document.getElementById('evalComplete1').checked;
+  const c2 = document.getElementById('evalComplete2') && document.getElementById('evalComplete2').checked;
+  const c3 = document.getElementById('evalComplete3') && document.getElementById('evalComplete3').checked;
+  const final = (c1 && c2 && c3) ? (t1 + t2 + t3) : 0;
+
+  ['evalTotal1','checkTotal1'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=t1; });
+  ['evalTotal2','checkTotal2'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=t2; });
+  ['evalTotal3','checkTotal3'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=t3; });
+  ['evalFinalTotal','checkFinalTotal'].forEach(id => { const el=document.getElementById(id); if(el) el.textContent=final; });
+
+  checklist.completed = {e1:c1, e2:c2, e3:c3};
+  // Completion checkboxes are also edits to this developmental area.
+  if (c1 || c2 || c3) checklist._dirty = true;
+}
+
+async function savePerformance() {
+  const perf = await DB.getPerformance(activePerfChildId);
+  const domains = (perf.domains || []).map(d => Object.assign({}, d));
+  const checklists = Object.assign({}, perf.checklists || {}, window.activePerformanceChecklists || {});
+
+  // Recalculate every checklist and write its totals into its matching domain.
+  Object.keys(PERFORMANCE_CHECKLISTS).forEach(domainKey => {
+    const checklist = checklists[domainKey];
+    if (!checklist || !checklist.items) return;
+    // Do not erase older numeric ratings for a domain that has not yet been
+    // converted to the detailed checklist. Only write checklist totals when
+    // that checklist already existed or the admin edited it in this session.
+    if (checklist._saved !== true && checklist._dirty !== true) return;
+    const t1 = checklist.items.filter(x => x.e1).length;
+    const t2 = checklist.items.filter(x => x.e2).length;
+    const t3 = checklist.items.filter(x => x.e3).length;
+    const completeAll = !!(checklist.completed && checklist.completed.e1 && checklist.completed.e2 && checklist.completed.e3);
+    const config = PERFORMANCE_CHECKLISTS[domainKey];
+    const idx = domains.findIndex(d => (d.name || '').toLowerCase().indexOf(config.label.toLowerCase()) >= 0);
+    if (idx >= 0) {
+      domains[idx].e1 = t1;
+      domains[idx].e2 = t2;
+      domains[idx].e3 = t3;
+      domains[idx].final = completeAll ? (t1 + t2 + t3) : 0;
+    }
+  });
+
+  // Save comments for the currently selected Development Area first.
+  const activeDomainKey = getSelectedPerformanceDomain();
+  if (!window.activePerformanceComments) window.activePerformanceComments = {};
+  window.activePerformanceComments[activeDomainKey] = {
+    e1: document.getElementById('evalComment1').value.trim(),
+    e2: document.getElementById('evalComment2').value.trim(),
+    e3: document.getElementById('evalComment3').value.trim(),
+    final: document.getElementById('finalCommentInput').value.trim()
+  };
+
+  // Preserve the old general comment fields for compatibility while the new
+  // domain-specific comments are stored in domainComments.
+  const activeComments = window.activePerformanceComments[activeDomainKey];
+
+  await DB.setPerformance(activePerfChildId, {
+    domains,
+    evalComments: activeComments,
+    finalComment: activeComments.final,
+    domainComments: window.activePerformanceComments,
+    checklists
+  });
+
+  showToast('Performance checklist, totals & comments saved!');
+  closeModal('perfModal');
+  await renderCurrentPage();
+}
+
+async function buildReportHtml(r) {
+  const fullName = childDisplayName(r);
+  const age = DB.calculateAge(r.dob);
+  const cid = r.childId || r.id;
+  const perf = await DB.getPerformance(cid);
+  const schoolYear = await DB.getSchoolYear();
+
+  const domainRows = perf.domains.map(d => {
+    const checklistKey = getDomainChecklistKey(d);
+    const checklist = checklistKey && perf.checklists ? perf.checklists[checklistKey] : null;
+    const final = getDomainFinalValue(perf, d);
+    const e1 = checklist ? (checklist.items || []).filter(x => x.e1).length : Number(d.e1 || 0);
+    const e2 = checklist ? (checklist.items || []).filter(x => x.e2).length : Number(d.e2 || 0);
+    const e3 = checklist ? (checklist.items || []).filter(x => x.e3).length : Number(d.e3 || 0);
+    return '<tr><td class="dname">' + d.name + '</td><td>' + e1.toFixed(1) + '</td><td>' + e2.toFixed(1) + '</td><td>' + e3.toFixed(1) + '</td><td><strong>' + final.toFixed(1) + '</strong></td></tr>';
+  }).join('');
+
+  const ec = perf.evalComments || {};
+  const evalCommentsHtml = [
+    ['1st Evaluation', ec.e1],
+    ['2nd Evaluation', ec.e2],
+    ['3rd Evaluation', ec.e3],
+  ].map(function(pair) {
+    const label = pair[0], text = pair[1];
+    return '<div class="print-eval-comment"><strong>' + label + ':</strong> ' + (text ? text.replace(/</g,'&lt;') : '<em>No comment recorded.</em>') + '</div>';
+  }).join('');
+
+  const finalCommentHtml = perf.finalComment
+    ? perf.finalComment.replace(/</g,'&lt;')
+    : '<em>No final comment recorded.</em>';
+
+  return '<div class="print-report-block">' +
+    '<div class="print-report-header">' +
+      '<img src="l.png" alt="logo" onerror="this.style.display=\'none\'">' +
+      '<div><h2>Greenhills Phase II Daycare Center</h2><div>Child Developmental Report &mdash; SY ' + schoolYear + '</div></div>' +
+    '</div>' +
+    '<table class="print-info-table">' +
+      '<tr><td><strong>Child Name:</strong> ' + fullName + '</td><td><strong>Child ID:</strong> ' + (r.childId || '—') + '</td></tr>' +
+      '<tr><td><strong>Date of Birth:</strong> ' + r.dob + '</td><td><strong>Age:</strong> ' + age.years + ' years, ' + age.months + ' months</td></tr>' +
+      '<tr><td><strong>Class:</strong> ' + (r.classSection || 'TBD') + '</td><td><strong>Session:</strong> ' + (r.session || 'TBD') + '</td></tr>' +
+    '</table>' +
+    '<h3>Developmental Domains</h3>' +
+    '<table class="print-perf-table"><thead><tr><th>Domain</th><th>1st Eval</th><th>2nd Eval</th><th>3rd Eval</th><th>Final</th></tr></thead><tbody>' + domainRows + '</tbody></table>' +
+    '<h3>Evaluation Comments</h3>' + evalCommentsHtml +
+    '<h3>Final Overall Comment</h3>' +
+    '<div class="print-final-comment">' + finalCommentHtml + '</div>' +
+    '<div class="print-footer"><div>Generated on ' + new Date().toLocaleString() + '</div><div class="signature-line">Teacher/Admin Signature: ____________________________</div></div>' +
+  '</div>';
+}
+
+async function handlePrintChild(childId) {
+  const rec = (await DB.getAllEnrollments()).find(r => (r.childId || r.id) === childId);
+  if (!rec) { showToast('⚠️ Record not found.'); return; }
+  showToast('Generating report for ' + childDisplayName(rec) + '...');
+  document.getElementById('printArea').innerHTML = await buildReportHtml(rec);
+  setTimeout(() => window.print(), 400);
+}
+
+async function handlePrintAll() {
+  const approved = (await DB.getAllEnrollments()).filter(r => r.status === 'approved');
+  if (!approved.length) { showToast('⚠️ No enrolled children to print.'); return; }
+  showToast('Generating reports for all enrolled children...');
+  const blocks = await Promise.all(approved.map(buildReportHtml));
+  document.getElementById('printArea').innerHTML = blocks.join('<div class="print-page-break"></div>');
+  setTimeout(() => window.print(), 400);
+}
+
+function togglePwd(id, btn) {
+  const input = document.getElementById(id);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁️'; }
+}
+
+async function handleUpdatePassword() {
+  const cur = document.getElementById('curPwd').value;
+  const np = document.getElementById('newPwd').value;
+  const cp = document.getElementById('confPwd').value;
+  if (!cur || !np || !cp) { showToast('⚠️ Please fill in all fields.'); return; }
+  if (np !== cp) { showToast('⚠️ New passwords do not match.'); return; }
+  if (np.length < 6) { showToast('⚠️ New password must be at least 6 characters.'); return; }
+  const result = await DB.changePassword(currentUser.username, cur, np);
+  if (!result.ok) { showToast('⚠️ ' + result.error); return; }
+  showToast('✅ Password updated successfully!');
+  ['curPwd','newPwd','confPwd'].forEach(id => document.getElementById(id).value = '');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+renderCurrentPage();
+</script>
+
+<!-- PRINTABLE REPORT(S) - populated by handlePrintChild / handlePrintAll -->
+<div id="printArea" class="print-area"></div>
+
+</body>
+</html>

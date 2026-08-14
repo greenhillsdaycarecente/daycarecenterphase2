@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daycare Center - Sign Up</title>
+
+    <link rel="stylesheet" href="signup.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="page">
+
+    <div class="card">
+
+        <div class="brand">
+            <img src="g.png" alt="Greenhills Phase II Child Development Center" class="logo">
+            <h1>Create Account</h1>
+            <p class="subtitle"><span class="dot dot-green"></span> Parent / Guardian Registration <span class="dot dot-orange"></span></p>
+        </div>
+
+        <div id="formMessage" class="form-message" style="display:none;"></div>
+
+        <form id="signupForm">
+
+            <div class="form-grid">
+
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="fullName" placeholder="Enter full name">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Enter email address">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Contact Number</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="text" id="contact" placeholder="Enter contact number">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Address</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-house"></i>
+                        <input type="text" id="address" placeholder="Enter your address">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Guardian Name</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="guardianName" placeholder="Enter guardian name">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Username</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-user-tag"></i>
+                        <input type="text" id="username" placeholder="Choose username">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" placeholder="Create password">
+                        <i class="fa-solid fa-eye toggle-pwd" id="togglePassword" onclick="togglePasswordField('password','togglePassword')"></i>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="confirmPassword" placeholder="Confirm password">
+                        <i class="fa-solid fa-eye toggle-pwd" id="toggleConfirmPassword" onclick="togglePasswordField('confirmPassword','toggleConfirmPassword')"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="note-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>
+                    Only parents or guardians can create an account.
+                    Administrator approval is required.
+                </span>
+            </div>
+
+            <button type="button" class="register-btn" onclick="register()">
+                <i class="fa-solid fa-user-plus"></i>
+                Register Account
+            </button>
+
+        </form>
+
+        <div class="login-link">
+            Already have an account?
+            <a href="login.html">Login</a>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="supabase.js"></script>
+<script src="db.js"></script>
+<script>
+function togglePasswordField(inputId, iconId){
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if(input.type === 'password'){
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function showMessage(text, type){
+    const box = document.getElementById('formMessage');
+    box.textContent = text;
+    box.className = 'form-message ' + (type || 'error');
+    box.style.display = 'block';
+}
+
+async function register(){
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const guardianName = document.getElementById('guardianName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if(!fullName || !email || !contact || !address || !guardianName || !username || !password || !confirmPassword){
+        showMessage('Please fill in all fields.', 'error');
+        return;
+    }
+
+    if(password.length < 6){
+        showMessage('Password must be at least 6 characters.', 'error');
+        return;
+    }
+
+    if(password !== confirmPassword){
+        showMessage('Passwords do not match.', 'error');
+        return;
+    }
+
+    let result;
+    try {
+        result = await DB.signUp({ fullName, email, contact, address, guardianName, username, password });
+    } catch (e) {
+        showMessage('Could not reach the database. Please try again.', 'error');
+        return;
+    }
+
+    if(!result.ok){
+        showMessage(result.error, 'error');
+        return;
+    }
+
+    showMessage('Account created successfully! Redirecting to login...', 'success');
+    setTimeout(function(){
+        window.location.href = 'login.html';
+    }, 1200);
+}
+</script>
+
+</body>
+</html>

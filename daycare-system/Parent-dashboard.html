@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Greenhills Phase II Daycare Center</title>
+<link rel="stylesheet" href="Parent-dashboard.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Hamburger -->
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">&#9776;</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <img src="g.png" alt="Greenhills Phase II Daycare Center Logo" class="logo-img" />
+    <div class="logo-text">
+      <strong>Greenhills Phase II</strong>
+      <span>Daycare Center</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="nav-icon"><i class="fa-solid fa-house"></i></span> Dashboard
+    </button>
+    <button class="nav-item" onclick="navigate('my-child', this)">
+      <span class="nav-icon"><i class="fa-solid fa-child"></i></span> My Child
+    </button>
+    <button class="nav-item" onclick="navigate('performance', this)">
+      <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> Performance
+    </button>
+    <button class="nav-item" onclick="navigate('print', this)">
+      <span class="nav-icon"><i class="fa-solid fa-print"></i></span> Print
+    </button>
+    <button class="nav-item" onclick="navigate('change-password', this)">
+      <span class="nav-icon"><i class="fa-solid fa-lock"></i></span> Change Password
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <button class="logout-btn" onclick="showLogout()">
+      <span><i class="fa-solid fa-right-from-bracket"></i></span> Log Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="welcomeTitle">Welcome back! &#128075;</div>
+        <div class="page-subtitle">Here's an overview of your child's progress.</div>
+      </div>
+      <div class="sy-badge" title="Switch school year">
+        &#128197;
+        <select class="sy-select-inline" id="syDropdown1" onchange="changeSchoolYear(this)">
+          <option value="2023-2024">SY 2023-2024</option>
+          <option value="2024-2025">SY 2024-2025</option>
+          <option value="2025-2026">SY 2025-2026</option>
+          <option value="2026-2027">SY 2026-2027</option>
+          <option value="2027-2028">SY 2027-2028</option>
+          <option value="2028-2029">SY 2028-2029</option>
+          <option value="2029-2030">SY 2029-2030</option>
+          <option value="2030-2031">SY 2030-2031</option>
+          <option value="2031-2032">SY 2031-2032</option>
+          <option value="2032-2033">SY 2032-2033</option>
+        </select>
+        <span id="sySpan1" style="display:none;"></span>
+      </div>
+    </div>
+
+    <div class="child-card">
+      <div class="child-avatar" id="dashAvatar">&#128102;</div>
+      <div class="child-info">
+        <div class="child-name" id="dashChildName">&ndash; <span class="age-tag" id="dashAgeTag"></span></div>
+        <div class="child-meta">
+          <span id="dashSession"></span>
+          <span>School Year: <span id="sySpan2"></span></span>
+        </div>
+      </div>
+      <div class="eligible-box">
+        <div class="eligible-label">&#9989; Class: <span id="dashClass"></span></div>
+        <div class="eligible-range">Child ID: <span id="dashChildId"></span></div>
+        <div class="eligible-note">Age at End of School Year</div>
+        <div class="eligible-age" id="dashAgeEnd">&ndash;</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">My Child Performance Overview</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>Developmental Domain</th><th>1st Eval</th><th>2nd Eval</th><th>3rd Eval</th><th>Final</th><th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="dashPerfBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-card performance-chart-card">
+      <div class="section-title">📈 Average Rating by Developmental Domain</div>
+      <div class="chart-subtitle">Your child's final score across the seven developmental domains. The graph uses the actual total score, not a percentage.</div>
+      <div class="performance-chart-wrap">
+        <canvas id="parentDomainAverageChart" aria-label="Line graph showing your child's average final score by developmental domain"></canvas>
+        <div id="parentDomainAverageChartEmpty" class="performance-chart-empty" style="display:none;">No final performance ratings recorded yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY CHILD -->
+  <div class="page" id="page-my-child">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="my-child-layout">
+      <div class="info-card">
+        <div class="child-photo-area">
+          <div class="child-photo-big" id="myChildPhoto">&#128102;</div>
+          <div style="font-size:12px; color:var(--text-light); font-weight:600;"></div>
+        </div>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:160px;">
+            <div class="info-row"><span class="info-label">Child ID</span><span>:</span><span class="info-value" id="mcChildId">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Child Name</span><span>:</span><span class="info-value" id="mcChildName">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Date of Birth</span><span>:</span><span class="info-value" id="mcDob">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Age</span><span>:</span><span class="info-value" id="mcAge">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Gender</span><span>:</span><span class="info-value" id="mcGender">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Class</span><span>:</span><span class="info-value" id="mcClass">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Session</span><span>:</span><span class="info-value" id="mcSession">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">School Year</span><span>:</span><span class="info-value" id="mcSchoolYear">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Emergency Contact</span><span>:</span><span class="info-value" id="mcEmergency">&ndash;</span></div>
+            <div class="info-row"><span class="info-label">Allergies</span><span>:</span><span class="info-value" id="mcAllergies">&ndash;</span></div>
+          </div>
+          <div class="eligible-box" style="align-self:flex-start; min-width:140px;">
+            <div class="eligible-label">&#9989; Enrolled</div>
+            <div class="eligible-note">Age at End of School Year</div>
+            <div class="eligible-age" id="mcAgeEnd">&ndash;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div class="page" id="page-performance">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+      <div class="sy-badge" title="Switch school year">
+        &#128197;
+        <select class="sy-select-inline" id="syDropdown2" onchange="changeSchoolYear(this)">
+          <option value="2023-2024">SY 2023-2024</option>
+          <option value="2024-2025">SY 2024-2025</option>
+          <option value="2025-2026">SY 2025-2026</option>
+          <option value="2026-2027">SY 2026-2027</option>
+          <option value="2027-2028">SY 2027-2028</option>
+          <option value="2028-2029">SY 2028-2029</option>
+          <option value="2029-2030">SY 2029-2030</option>
+          <option value="2030-2031">SY 2030-2031</option>
+          <option value="2031-2032">SY 2031-2032</option>
+          <option value="2032-2033">SY 2032-2033</option>
+        </select>
+        <span id="sySpan3" style="display:none;"></span>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">My Child Performance Overview</div>
+      <table class="perf-table">
+        <thead>
+          <tr>
+            <th>Developmental Domain</th><th>1st Eval</th><th>2nd Eval</th><th>3rd Eval</th><th>Final</th><th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="perfBody"></tbody>
+      </table>
+      <div class="perf-footer" id="perfFooter">&#11088; Keep up the great work!</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">&#128172; Teacher Comments</div>
+      <div id="teacherComments" style="display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+  </div>
+
+  <!-- PRINT -->
+  <div class="page" id="page-print">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="section-card print-card">
+      <div class="print-center">
+        <div class="print-icon-big">&#128424;</div>
+        <div class="print-title">Performance Report</div>
+        <div class="print-desc">Generate a printable report of your child's performance for SY <span id="sySpan4"></span>.</div>
+        <button class="print-btn" onclick="handlePrint()">&#128424; Generate &amp; Print Report</button>
+        <button class="print-btn" style="background:#2563EB; margin-top:10px;" onclick="handleDownloadPdf()">&#11015;&#65039; Download as PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD -->
+  <div class="page" id="page-change-password">
+    <div class="page-header">
+      <div>
+        <div class="page-title"></div>
+        <div class="page-subtitle"></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="password-form">
+        <div class="lock-icon-big">&#128272;</div>
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Enter current password" id="curPwd" />
+            <button class="eye-btn" onclick="togglePwd('curPwd', this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Enter new password" id="newPwd" />
+            <button class="eye-btn" onclick="togglePwd('newPwd', this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" placeholder="Confirm new password" id="confPwd" />
+            <button class="eye-btn" onclick="togglePwd('confPwd', this)">&#128065;&#65039;</button>
+          </div>
+        </div>
+        <button class="update-btn" onclick="handleUpdatePassword()">&#128274; Update Password</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal">
+    <div class="modal-icon">&#128682;</div>
+    <div class="modal-title">Are you sure you want to log out?</div>
+    <div class="modal-desc">You will need to login again to access your account.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="hideLogout()">Cancel</button>
+      <button class="btn-logout-confirm" onclick="confirmLogout()">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script src="supabase.js"></script>
+<script src="db.js"></script>
+<script>
+  // ---------- AUTH GUARD & DATA LOADING ----------
+  const currentUser = DB.currentUser();
+  if (!currentUser || currentUser.role !== 'parent') {
+    window.location.href = 'login.html';
+  }
+
+  let enrollment = null;
+
+  // ---------- SCHOOL YEAR DROPDOWN (matches Admin Dashboard) ----------
+  const SY_YEAR_START = 2023;
+  const SY_YEAR_END = 2032;
+
+  function populateSchoolYearDropdowns() {
+    document.querySelectorAll('.sy-select-inline').forEach(sel => {
+      const current = sel.value;
+      let opts = '';
+      for (let y = SY_YEAR_START; y <= SY_YEAR_END; y++) {
+        const val = y + '-' + (y + 1);
+        opts += '<option value="' + val + '">SY ' + y + '-' + (y + 1) + '</option>';
+      }
+      sel.innerHTML = opts;
+      if (current && Array.from(sel.options).some(o => o.value === current)) sel.value = current;
+    });
+  }
+
+  function applySchoolYear(year) {
+    document.querySelectorAll('#sySpan1,#sySpan2,#sySpan3,#sySpan4').forEach(el => el.textContent = year);
+  }
+
+  function initSchoolYearDropdowns(selectedYear) {
+    populateSchoolYearDropdowns();
+    const selected = selectedYear || '2026-2027';
+    document.querySelectorAll('.sy-select-inline').forEach(sel => { sel.value = selected; });
+    applySchoolYear(selected);
+  }
+
+  function changeSchoolYear(selectEl) {
+    const year = selectEl.value;
+    document.querySelectorAll('.sy-select-inline').forEach(sel => { sel.value = year; });
+    applySchoolYear(year);
+    showToast('📅 Switched to School Year ' + year.replace('-', '–'));
+  }
+
+  async function loadData() {
+    enrollment = await DB.getEnrollmentByParent(currentUser.username);
+    if (!enrollment) { window.location.href = 'enrollment.html'; return; }
+    if (enrollment.status === 'pending' || enrollment.status === 'rejected') {
+      window.location.href = 'enrollment-pending.html'; return;
+    }
+
+    const sy = await DB.getSchoolYear();
+    initSchoolYearDropdowns(sy);
+    document.getElementById('welcomeTitle').textContent = 'Welcome back, ' + currentUser.fullName + '! 👋';
+
+    const fullName = enrollment.firstName + ' ' + (enrollment.middleName ? enrollment.middleName + ' ' : '') + enrollment.lastName;
+    const age = DB.calculateAge(enrollment.dob);
+    const ageEnd = await DB.ageAtEndOfSchoolYear(enrollment.dob);
+    const ageStr = age.years + 'y ' + age.months + 'm';
+
+    if (enrollment.photoDataUrl) {
+      document.getElementById('dashAvatar').innerHTML = '<img src="' + enrollment.photoDataUrl + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+      document.getElementById('myChildPhoto').innerHTML = '<img src="' + enrollment.photoDataUrl + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">';
+    }
+
+    // Dashboard
+    document.getElementById('dashChildName').innerHTML = fullName + ' <span class="age-tag" id="dashAgeTag">' + ageStr + '</span>';
+    document.getElementById('dashSession').textContent = (enrollment.session === 'Afternoon' ? '🌙 ' : '☀️ ') + (enrollment.session || 'Session TBD') + ' Class';
+    document.getElementById('dashClass').textContent = enrollment.classSection || 'TBD';
+    document.getElementById('dashChildId').textContent = enrollment.childId || 'Pending assignment';
+    document.getElementById('dashAgeEnd').textContent = ageEnd.years + 'y ' + ageEnd.months + 'm';
+
+    // My Child page
+    document.getElementById('mcChildId').textContent = enrollment.childId || '—';
+    document.getElementById('mcChildName').textContent = fullName;
+    document.getElementById('mcDob').textContent = enrollment.dob;
+    document.getElementById('mcAge').textContent = ageStr + ' ' + age.days + 'd';
+    document.getElementById('mcGender').textContent = enrollment.gender;
+    document.getElementById('mcClass').textContent = enrollment.classSection || 'TBD';
+    document.getElementById('mcSession').textContent = enrollment.session || 'TBD';
+    document.getElementById('mcSchoolYear').textContent = sy;
+    document.getElementById('mcEmergency').textContent = enrollment.emName + ' (' + enrollment.emRelationship + ') — ' + enrollment.emPhone;
+    document.getElementById('mcAllergies').textContent = enrollment.allergies || 'None reported';
+    document.getElementById('mcAgeEnd').textContent = ageEnd.years + 'y ' + ageEnd.months + 'm';
+
+    await renderPerformance();
+    await renderComments();
+  }
+
+  const PARENT_PERFORMANCE_CHECKLISTS = {
+    grossMotor: { label:'Gross Motor', items:[
+      'Climbs on chair or other elevated furniture like a bed without help','Walks backwards','Runs without tripping or falling','Walks down stairs, two feet on each step, with one hand held','Walks upstairs holding onto a handrail, two feet on each step','Walks upstairs with alternate feet without holding onto a handrail','Walks downstairs with alternate feet without holding onto a handrail','Moves body part as directed','Jumps up','Throws ball overhead with direction','Hops one to three steps on preferred foot','Jumps and turns','Dances patterns/joins group movement activities'] },
+    fineMotor: { label:'Fine Motor', items:[
+      'Uses all five fingers to get food/toys placed on a flat surface','Picks up objects with thumb and index finger','Displays a definite hand preference','Puts small objects in/out of containers','Holds crayon with all the fingers of his hand making a fist (i.e., palmar grasp)','Unscrews the lid of a container or unwraps food','Scribbles spontaneously','Scribbles vertical and horizontal lines','Draws circle purposeful','Draws a human figure (head, eyes, trunk, arms, hands/fingers)','Draws a house using geometric forms'] },
+    selfHelp: { label:'Self-Help', sections:[
+      {label:'Feeding sub-domain',start:0},{label:'Dressing sub-domain',start:13},{label:'Toilet Training sub-domain',start:18},{label:'Bathing sub-domain',start:23}], items:[
+      'Feeds self with finger food (e.g. biscuits, bread) using fingers','Feeds self using fingers to eat rice/hands with spillage','Feeds self using spoon with spillage','Feeds self using fingers without spillage','Feeds self using spoon without spillage','Eats without need for spoonfeeding during any meal','Helps hold cup for drinking','Drinks from cup with spillage','Drinks from cup unassisted','Gets drink for self unassisted','Pours from pitcher without spillage','Prepares own food/snack','Prepares meals for younger siblings/family members when no adult is around','Participates when being dressed (e.g., raises arms or lifts leg)','Pulls down gartered short pants','Removes sando','Dresses without assistance except for buttons and tying','Dresses without assistance including buttons and tying','Informs the adult only after he has already urinated or moved bowels','Informs the adult of need to urinate or move bowels','Goes to designated place but sometimes still does this in underpants','Goes to designated place and never does this in underpants anymore','Wipes/cleans self after a bowel movement','Participates when bathing (e.g., rubbing arms with soap)','Washes and dries hands without any help','Washes face without any help','Bathes without any help'] },
+    receptiveLanguage: { label:'Receptive Language', items:[
+      'Points to a family member when asked to do so','Points to five body parts on himself when asked to do so','Points to five named pictured objects when asked to do so','Follows one-step instructions that include simple prepositions (e.g., in, on, under, etc.)','Follows two-step instructions that include simple prepositions'] },
+    expressiveLanguage: { label:'Expressive Language', items:[
+      'Uses five to 20 recognizable words','Uses pronouns (e.g. I, me, ako, akin)','Uses two- to three-word verb-noun combinations (e.g., \'bingi\' gatas)','Names objects in pictures','Speaks in grammatically correct two- to three-word sentences','Asks "what" questions','Asks "who" and "why" questions','Gives account of recent experiences (with prompting) in order of occurrence using past tense'] },
+    cognitive: { label:'Cognitive', items:[
+      'Looks in the direction of fallen object','Looks for a partially hidden object','Imitates behavior just seen a few minutes earlier','Offers an object but will not release it','Looks for a completely hidden object','Exhibits simple \'pretend\' play (feeds, put doll to sleep)','Matches objects','Matches two to three colors','Matches pictures','Sorts based on shapes','Sorts objects based on two attributes (e.g., size and color)','Arranges objects according to size from smallest to biggest','Names four to six colors','Copies shapes','Names 3 animals or vegetables when asked','States what common household items are used for','Can assemble simple puzzles','Demonstrates an understanding of opposites by completing a statement','Points to left and right sides of body','Can state what is silly or wrong with pictures','Matches upper case letters, and matches lower case letters'] },
+    socialEmotional: { label:'Social-Emotional', items:[
+      'Enjoys watching activities of nearby people or animals','Friendly with strangers but initially may show slight anxiety or shyness','Plays alone but likes to be near familiar adults or brothers and sisters','Laughs or squeals aloud in play','Plays peek-a-boo (bulaga)','Rolls ball interactively with caregiver/teammate','Hugs or cuddles toys','Demonstrates respect for elders using terms like "po" and "opo"','Shares toys with others','Imitates adult activities (e.g., cooking, washing)','Identifies feelings in others','Appropriately uses cultural gestures of greeting without much prompting (e.g., mano, bless, kiss, etc.)','Comforts playmates/siblings in distress','Persists when faced with a problem or obstacle to his wants','Helps with family chores (e.g., wiping tables, watering plants, etc.)','Curious about environment but knows when to stop asking questions of adults','Waits for his turn','Asks permission to play with toy being used by another','Defends possessions with determination','Plays organized group games fairly (e.g., does not cheat to win)','Can talk about complex feelings (e.g., anger, sadness, worry) he experiences','Honors a simple bargain with caregiver (e.g., plays outside only after cleaning/fixing his/her room)','Watches responsibly over younger siblings/family members','Cooperates with adults and peers in group situations to minimize quarrels and conflicts'] }
+  };
+
+  function domainKeyFromName(name) {
+    const n = String(name || '').toLowerCase();
+    if (n.includes('gross motor')) return 'grossMotor';
+    if (n.includes('fine motor')) return 'fineMotor';
+    if (n.includes('self-help') || n.includes('self help')) return 'selfHelp';
+    if (n.includes('receptive language')) return 'receptiveLanguage';
+    if (n.includes('expressive language')) return 'expressiveLanguage';
+    if (n.includes('cognitive')) return 'cognitive';
+    if (n.includes('social-emotional') || n.includes('social emotional')) return 'socialEmotional';
+    return null;
+  }
+
+  function getDomainFinal(a) {
+    if (a && a.final != null) return Number(a.final) || 0;
+    return (Number(a?.e1 || 0) + Number(a?.e2 || 0) + Number(a?.e3 || 0));
+  }
+
+  let parentDomainAverageChart = null;
+
+  function renderParentAverageChart(domains) {
+    const canvas = document.getElementById('parentDomainAverageChart');
+    const empty = document.getElementById('parentDomainAverageChartEmpty');
+    if (!canvas || typeof Chart === 'undefined') return;
+    const labels = ['Gross Motor','Fine Motor','Self-Help','Receptive Language','Expressive Language','Cognitive','Social-Emotional'];
+    const values = labels.map(label => {
+      const wantedKey = domainKeyFromName(label);
+      const d = domains.find(a => domainKeyFromName(a.name) === wantedKey);
+      if (!d) return null;
+      const score = getDomainFinal(d);
+      return Number.isFinite(score) && score > 0 ? Number(score.toFixed(1)) : null;
+    });
+    const hasData = values.some(v => v !== null && v > 0);
+    canvas.style.display = hasData ? 'block' : 'none';
+    empty.style.display = hasData ? 'none' : 'block';
+    if (parentDomainAverageChart) {
+      parentDomainAverageChart.destroy();
+      parentDomainAverageChart = null;
+    }
+    if (!hasData) return;
+    parentDomainAverageChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Average Final Score', data: values, spanGaps: true, tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4, pointHoverRadius: 6 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 }, title: { display: true, text: 'Average Score' } }, x: { ticks: { autoSkip: false, maxRotation: 35, minRotation: 20 } } },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => 'Average Final Score: ' + Number(ctx.parsed.y).toFixed(1) } } }
+      }
+    });
+  }
+
+  async function renderPerformance() {
+    const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
+    const domains = perf.domains || perf.areas || [];
+    renderParentAverageChart(domains);
+    const rowsHtml = domains.map(a => {
+      const e1 = Number(a.e1 || a.q1 || 0);
+      const e2 = Number(a.e2 || a.q2 || 0);
+      const e3 = Number(a.e3 || a.q3 || 0);
+      const final = getDomainFinal(a);
+      const key = domainKeyFromName(a.name);
+      return '<tr><td>' + escapeParentHtml(a.name) + '</td><td>' + e1 + '</td><td>' + e2 + '</td><td>' + e3 + '</td><td><span class="rating-badge">' + final.toFixed(1) + '</span></td><td><button type="button" class="parent-view-btn" data-domain="' + (key || '') + '">View Details</button></td></tr>';
+    }).join('');
+    document.getElementById('dashPerfBody').innerHTML = rowsHtml;
+    document.getElementById('perfBody').innerHTML = rowsHtml;
+    bindParentPerformanceButtons();
+    document.getElementById('perfFooter').textContent = perf.updatedAt
+      ? '⭐ Last updated ' + new Date(perf.updatedAt).toLocaleDateString()
+      : '⭐ No performance ratings recorded yet.';
+  }
+
+  function escapeParentHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function bindParentPerformanceButtons() {
+    document.querySelectorAll('.parent-view-btn').forEach(btn => {
+      btn.addEventListener('click', () => openParentPerformanceDetails(btn.dataset.domain));
+    });
+  }
+
+  async function openParentPerformanceDetails(domainKey) {
+    const config = PARENT_PERFORMANCE_CHECKLISTS[domainKey];
+    if (!config) return;
+    const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
+    const checklist = (perf.checklists && perf.checklists[domainKey]) || null;
+    const domain = (perf.domains || []).find(d => domainKeyFromName(d.name) === domainKey) || {e1:0,e2:0,e3:0,final:0};
+    const comments = (perf.domainComments && perf.domainComments[domainKey]) || {};
+
+    document.getElementById('parentPerfModalTitle').textContent = config.label + ' – Performance Details';
+    document.getElementById('parentPerfDomainSelect').value = domainKey;
+    document.getElementById('parentPerfDetailsBody').innerHTML = renderParentChecklist(config, checklist);
+    document.getElementById('parentPerfSummary').innerHTML =
+      '<div class="parent-score-pill"><span>1st Eval</span><strong>' + Number(domain.e1 || 0) + '</strong></div>' +
+      '<div class="parent-score-pill"><span>2nd Eval</span><strong>' + Number(domain.e2 || 0) + '</strong></div>' +
+      '<div class="parent-score-pill"><span>3rd Eval</span><strong>' + Number(domain.e3 || 0) + '</strong></div>' +
+      '<div class="parent-score-pill final"><span>Final</span><strong>' + getDomainFinal(domain).toFixed(1) + '</strong></div>';
+    document.getElementById('parentEvalComments').innerHTML = renderParentComments(comments);
+    document.getElementById('parentPerfModal').classList.add('show');
+  }
+
+  function renderParentChecklist(config, checklist) {
+    if (!checklist || !Array.isArray(checklist.items)) {
+      return '<div class="parent-no-detail">No detailed checklist has been recorded for this developmental area yet.</div>';
+    }
+    const sections = config.sections || [];
+    let html = '';
+    checklist.items.forEach((item, i) => {
+      const section = sections.find(s => s.start === i);
+      if (section) html += '<tr class="parent-check-section"><td></td><td colspan="5">' + escapeParentHtml(section.label) + '</td></tr>';
+      html += '<tr><td>' + (i+1) + '</td><td>' + escapeParentHtml(item.name || '') + '</td>' +
+        ['e1','e2','e3'].map(e => '<td class="parent-check-cell">' + (item[e] ? '✓' : '—') + '</td>').join('') +
+        '<td>' + escapeParentHtml(item.comment || '—') + '</td></tr>';
+    });
+    return '<table class="parent-detail-table"><thead><tr><th>No.</th><th>' + escapeParentHtml(config.label) + '</th><th>1st Eval</th><th>2nd Eval</th><th>3rd Eval</th><th>Comments</th></tr></thead><tbody>' + html + '</tbody></table>';
+  }
+
+  function renderParentComments(c) {
+    const rows = [ ['1st Evaluation', c.e1], ['2nd Evaluation', c.e2], ['3rd Evaluation', c.e3], ['Final Comment', c.final] ].filter(x => x[1]);
+    return rows.length ? rows.map(x => '<div class="parent-comment-row"><strong>' + x[0] + '</strong><span>' + escapeParentHtml(x[1]) + '</span></div>').join('') : '<div class="parent-no-detail">No comments recorded for this developmental area.</div>';
+  }
+
+  function closeParentPerformanceDetails() { document.getElementById('parentPerfModal').classList.remove('show'); }
+
+  function switchParentPerformanceDomain() {
+    const key = document.getElementById('parentPerfDomainSelect').value;
+    openParentPerformanceDetails(key);
+  }
+
+  async function renderComments() {
+    const comments = (await DB.getComments(enrollment.childId || enrollment.id)).filter(c => c.from === 'teacher');
+    const box = document.getElementById('teacherComments');
+    if (!comments.length) {
+      box.innerHTML = '<div style="color:var(--text-light); font-size:14px;">No comments yet.</div>';
+      return;
+    }
+    box.innerHTML = comments.slice().reverse().map(c => {
+      return '<div style="background:var(--blue-light); border-radius:10px; padding:12px 16px;">' +
+        '<div style="font-weight:800; font-size:12px; color:var(--blue-dark); margin-bottom:4px;">' +
+        '👩‍🏫 Teacher · ' + new Date(c.date).toLocaleString() + '</div>' +
+        '<div style="font-size:14px; color:var(--text-dark);">' + c.text.replace(/</g,'&lt;') + '</div></div>';
+    }).join('');
+  }
+
+  loadData();
+
+  function navigate(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    if (btn) btn.classList.add('active');
+    closeSidebar();
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+
+  function showLogout() { document.getElementById('logoutModal').classList.add('show'); }
+  function hideLogout() { document.getElementById('logoutModal').classList.remove('show'); }
+
+  function confirmLogout() {
+    hideLogout();
+    DB.logout();
+    showToast('Logged out successfully. Goodbye!');
+    setTimeout(() => window.location.href = 'login.html', 800);
+  }
+
+  function togglePwd(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+    else { input.type = 'password'; btn.textContent = '👁️'; }
+  }
+
+  async function handleUpdatePassword() {
+    const cur = document.getElementById('curPwd').value;
+    const np = document.getElementById('newPwd').value;
+    const cp = document.getElementById('confPwd').value;
+    if (!cur || !np || !cp) { showToast('Please fill in all fields.'); return; }
+    if (np !== cp) { showToast('New passwords do not match.'); return; }
+    if (np.length < 6) { showToast('New password must be at least 6 characters.'); return; }
+    const result = await DB.changePassword(currentUser.username, cur, np);
+    if (!result.ok) { showToast(result.error); return; }
+    showToast('Password updated successfully!');
+    ['curPwd','newPwd','confPwd'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  async function fillReportArea() {
+    const fullName = enrollment.firstName + ' ' + (enrollment.middleName ? enrollment.middleName + ' ' : '') + enrollment.lastName;
+    const age = DB.calculateAge(enrollment.dob);
+    const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
+    const comments = (await DB.getComments(enrollment.childId || enrollment.id)).filter(c => c.from === 'teacher');
+
+    document.getElementById('pr_sy').textContent = document.getElementById('sySpan4').textContent || await DB.getSchoolYear();
+    document.getElementById('pr_name').textContent = fullName;
+    document.getElementById('pr_childId').textContent = enrollment.childId || '—';
+    document.getElementById('pr_dob').textContent = enrollment.dob;
+    document.getElementById('pr_age').textContent = age.years + ' years, ' + age.months + ' months';
+    document.getElementById('pr_class').textContent = enrollment.classSection || 'TBD';
+    document.getElementById('pr_session').textContent = enrollment.session || 'TBD';
+    document.getElementById('pr_generatedDate').textContent = new Date().toLocaleString();
+
+    const reportDomains = perf.domains || perf.areas || [];
+    document.getElementById('pr_perfBody').innerHTML = reportDomains.map(a => {
+      const final = getDomainFinal(a).toFixed(1);
+      return '<tr><td>' + escapeParentHtml(a.name) + '</td><td>' + Number(a.e1 || a.q1 || 0) + '</td><td>' + Number(a.e2 || a.q2 || 0) + '</td><td>' + Number(a.e3 || a.q3 || 0) + '</td><td>' + final + '</td></tr>';
+    }).join('');
+
+    document.getElementById('pr_comments').innerHTML = comments.length
+      ? comments.map(c => '<div class="print-comment">' + new Date(c.date).toLocaleDateString() + ' &mdash; ' + c.text.replace(/</g,'&lt;') + '</div>').join('')
+      : '<div class="print-comment">No comments recorded.</div>';
+
+    return fullName;
+  }
+
+  async function handlePrint() {
+    showToast('Generating report...');
+    await fillReportArea();
+    setTimeout(() => window.print(), 400);
+  }
+
+  async function handleDownloadPdf() {
+    showToast('Generating PDF...');
+
+    const fullName = enrollment.firstName + ' ' + (enrollment.middleName ? enrollment.middleName + ' ' : '') + enrollment.lastName;
+    const age = DB.calculateAge(enrollment.dob);
+    const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
+    const comments = (await DB.getComments(enrollment.childId || enrollment.id)).filter(c => c.from === 'teacher');
+    const schoolYear = document.getElementById('sySpan4').textContent || await DB.getSchoolYear();
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'letter' });
+
+      doc.setFontSize(16);
+      doc.setTextColor(29, 78, 216);
+      doc.text('Greenhills Phase II Daycare Center', 15, 18);
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.text('Child Performance Report \u2014 SY ' + schoolYear, 15, 25);
+      doc.setDrawColor(29, 78, 216);
+      doc.line(15, 28, 195, 28);
+
+      doc.setFontSize(11);
+      doc.setTextColor(20, 20, 20);
+      let y = 38;
+      const infoRows = [
+        ['Child Name:', fullName, 'Child ID:', enrollment.childId || '\u2014'],
+        ['Date of Birth:', String(enrollment.dob || '\u2014'), 'Age:', age.years + 'y ' + age.months + 'm'],
+        ['Class:', enrollment.classSection || 'TBD', 'Session:', enrollment.session || 'TBD'],
+      ];
+      infoRows.forEach(row => {
+        doc.setFont(undefined, 'bold'); doc.text(row[0], 15, y);
+        doc.setFont(undefined, 'normal'); doc.text(row[1], 45, y);
+        doc.setFont(undefined, 'bold'); doc.text(row[2], 115, y);
+        doc.setFont(undefined, 'normal'); doc.text(row[3], 145, y);
+        y += 7;
+      });
+
+      y += 5;
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'bold');
+      doc.text('Performance by Developmental Domain', 15, y);
+      y += 4;
+
+      const pdfDomains = perf.domains || perf.areas || [];
+      const tableBody = pdfDomains.map(a => {
+        const final = getDomainFinal(a).toFixed(1);
+        return [a.name, Number(a.e1 || a.q1 || 0), Number(a.e2 || a.q2 || 0), Number(a.e3 || a.q3 || 0), final];
+      });
+
+      doc.autoTable({
+        startY: y,
+        head: [['Developmental Domain', '1st Eval', '2nd Eval', '3rd Eval', 'Final']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: [239, 246, 255], textColor: [20, 20, 20] },
+        styles: { fontSize: 9, halign: 'center' },
+        columnStyles: { 0: { halign: 'left' } },
+      });
+
+      y = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(13);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(20, 20, 20);
+      doc.text('Teacher Comments', 15, y);
+      y += 7;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+
+      if (comments.length) {
+        comments.forEach(c => {
+          const line = new Date(c.date).toLocaleDateString() + ' \u2014 ' + c.text;
+          const split = doc.splitTextToSize(line, 180);
+          if (y + split.length * 5 > 265) { doc.addPage(); y = 20; }
+          doc.text(split, 15, y);
+          y += split.length * 5 + 3;
+        });
+      } else {
+        doc.text('No comments recorded.', 15, y);
+        y += 7;
+      }
+
+      y += 10;
+      if (y > 265) { doc.addPage(); y = 20; }
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text('Generated on ' + new Date().toLocaleString(), 15, y);
+      y += 12;
+      doc.text('Teacher/Admin Signature: ____________________________', 15, y);
+
+      const filenameSafe = fullName.trim().replace(/\s+/g, '_').replace(/[^\w\-]/g, '') || 'report';
+      doc.save(filenameSafe + '_performance_report.pdf');
+    } catch (e) {
+      console.error('PDF generation failed:', e);
+      showToast('\u26a0\ufe0f Could not generate PDF. Please try again.');
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+
+<!-- READ-ONLY PERFORMANCE DETAILS FOR PARENT -->
+<div class="modal-overlay parent-perf-modal-overlay" id="parentPerfModal">
+  <div class="modal parent-perf-modal" role="dialog" aria-modal="true" aria-labelledby="parentPerfModalTitle">
+    <div class="parent-perf-modal-head">
+      <div>
+        <div class="modal-title" id="parentPerfModalTitle">Performance Details</div>
+        <div class="modal-desc" style="margin-bottom:0;">View-only results entered by the teacher/admin.</div>
+      </div>
+      <button type="button" class="parent-modal-close" onclick="closeParentPerformanceDetails()" aria-label="Close">&times;</button>
+    </div>
+    <div class="parent-perf-toolbar">
+      <label class="form-label" for="parentPerfDomainSelect">Development Area</label>
+      <select id="parentPerfDomainSelect" class="form-input" onchange="switchParentPerformanceDomain()">
+        <option value="grossMotor">Gross Motor</option>
+        <option value="fineMotor">Fine Motor</option>
+        <option value="selfHelp">Self-Help</option>
+        <option value="receptiveLanguage">Receptive Language</option>
+        <option value="expressiveLanguage">Expressive Language</option>
+        <option value="cognitive">Cognitive</option>
+        <option value="socialEmotional">Social-Emotional</option>
+      </select>
+    </div>
+    <div class="parent-score-summary" id="parentPerfSummary"></div>
+    <div class="parent-detail-scroll" id="parentPerfDetailsBody"></div>
+    <div class="parent-comments-box">
+      <div class="section-title">&#128172; Evaluation Comments</div>
+      <div id="parentEvalComments"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRINTABLE REPORT (hidden on screen, shown only when printing) -->
+<div id="printArea" class="print-area">
+  <div class="print-report-header">
+    <img src="l.png" alt="logo" onerror="this.style.display='none'">
+    <div>
+      <h2>Greenhills Phase II Daycare Center</h2>
+      <div>Child Performance Report &mdash; SY <span id="pr_sy"></span></div>
+    </div>
+  </div>
+
+  <table class="print-info-table">
+    <tr><td><strong>Child Name:</strong> <span id="pr_name"></span></td><td><strong>Child ID:</strong> <span id="pr_childId"></span></td></tr>
+    <tr><td><strong>Date of Birth:</strong> <span id="pr_dob"></span></td><td><strong>Age:</strong> <span id="pr_age"></span></td></tr>
+    <tr><td><strong>Class:</strong> <span id="pr_class"></span></td><td><strong>Session:</strong> <span id="pr_session"></span></td></tr>
+  </table>
+
+  <h3>Performance by Developmental Domain</h3>
+  <table class="print-perf-table">
+    <thead>
+      <tr><th>Developmental Domain</th><th>1st Eval</th><th>2nd Eval</th><th>3rd Eval</th><th>Final</th></tr>
+    </thead>
+    <tbody id="pr_perfBody"></tbody>
+  </table>
+
+  <h3>Teacher Comments</h3>
+  <div id="pr_comments"></div>
+
+  <div class="print-footer">
+    <div>Generated on <span id="pr_generatedDate"></span></div>
+    <div class="signature-line">Teacher Signature: ____________________________</div>
+  </div>
+</div>
+
+</body>
+</html>
