@@ -13,7 +13,7 @@
      <script src="db.js"></script>
    ========================================================================= */
 
-const SUPABASE_URL = "https://mkufqxpnpnbxvzhcillk.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_Fgdqv5WWho2pXxboMEKL6A_fWPd4cqS";
+const SUPABASE_URL = "https://xaytpdmmwajvnndhuuml.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_kSAkfdWWg2TBbe5vGgbZOg_WT8zSQXX";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
