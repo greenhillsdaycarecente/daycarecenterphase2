@@ -283,7 +283,7 @@
   // ---------- AUTH GUARD & DATA LOADING ----------
   const currentUser = DB.currentUser();
   if (!currentUser || currentUser.role !== 'parent') {
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
   }
 
   let enrollment = null;
@@ -555,7 +555,7 @@
     hideLogout();
     DB.logout();
     showToast('Logged out successfully. Goodbye!');
-    setTimeout(() => window.location.href = 'login.html', 800);
+    setTimeout(() => window.location.href = 'index.html', 800);
   }
 
   function togglePwd(id, btn) {

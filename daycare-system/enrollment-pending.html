@@ -41,7 +41,7 @@
 <script>
 const currentUser = DB.currentUser();
 if(!currentUser || currentUser.role !== 'parent'){
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 async function refresh(){
@@ -82,7 +82,7 @@ async function refresh(){
 
 function logout(){
     DB.logout();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 refresh();

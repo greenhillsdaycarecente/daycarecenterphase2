@@ -603,7 +603,7 @@
 // ---------- AUTH GUARD ----------
 const currentUser = DB.currentUser();
 if (!currentUser || currentUser.role !== 'admin') {
-  window.location.href = 'login.html';
+  window.location.href = '';
 }
 
 let activeEnrollId = null; // currently open in enrollModal
@@ -680,7 +680,7 @@ function confirmLogout() {
   hideLogout();
   DB.logout();
   showToast('Logged out successfully. Goodbye!');
-  setTimeout(() => window.location.href = 'login.html', 800);
+  setTimeout(() => window.location.href = 'index.html', 800);
 }
 
 function showModal(id) { document.getElementById(id).classList.add('show'); }

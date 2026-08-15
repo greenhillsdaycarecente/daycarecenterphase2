@@ -160,7 +160,7 @@
 <script>
 const currentUser = DB.currentUser();
 if(!currentUser || currentUser.role !== 'parent'){
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 
 // If parent already has an approved/pending enrollment, redirect appropriately
@@ -286,7 +286,7 @@ function fileName(id){
 
 function logout(){
     DB.logout();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
 </script>
 
