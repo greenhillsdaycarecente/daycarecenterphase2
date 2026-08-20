@@ -8,6 +8,8 @@
     <title>Daycare Center - Application Status</title>
     <link rel="stylesheet" href="enrollment-pending.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 </head>
 <body>
 
@@ -80,10 +82,7 @@ async function refresh(){
     }
 }
 
-function logout(){
-    DB.logout();
-    window.location.href = 'index.html';
-}
+function logout(){ DB.logout(); window.location.replace('logout.html'); }
 
 refresh();
 </script>

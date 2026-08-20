@@ -8,6 +8,8 @@
     <title>Daycare Center - Enrollment Form</title>
     <link rel="stylesheet" href="enrollment.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 </head>
 <body>
 
@@ -50,7 +52,7 @@
     <div class="tabs">
         <div class="tab active" data-tab="personal">Personal Information</div>
         <div class="tab" data-tab="documents">Documents</div>
-        <div class="tab" data-tab="emergency">Emergency Contact</div>
+        <div class="tab" data-tab="emergency">Guardian/Emergency Contact</div>
     </div>
 
     <div class="tab-content-wrap">
@@ -116,8 +118,35 @@
             </div>
         </section>
 
-        <!-- EMERGENCY CONTACT -->
+        <!-- GUARDIAN / EMERGENCY CONTACT -->
         <section class="tab-panel" id="panel-emergency">
+            <div class="section-subtitle" style="font-size:16px;font-weight:800;color:#1E3A8A;margin-bottom:14px;">Guardian Information</div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Guardian Name *</label>
+                    <input type="text" id="guardianName">
+                </div>
+                <div class="field">
+                    <label>Relationship to Child *</label>
+                    <input type="text" id="guardianRelationship">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Primary Contact Number *</label>
+                    <input type="text" id="guardianPhone">
+                </div>
+                <div class="field">
+                    <label>Alternate Contact Number</label>
+                    <input type="text" id="guardianAltPhone">
+                </div>
+            </div>
+            <div class="field">
+                <label>Guardian Contact Address *</label>
+                <input type="text" id="guardianAddress">
+            </div>
+
+            <div class="section-subtitle" style="font-size:16px;font-weight:800;color:#1E3A8A;margin:24px 0 14px;">Emergency Contact Information</div>
             <div class="grid-2">
                 <div class="field">
                     <label>Emergency Contact Name *</label>
@@ -139,7 +168,7 @@
                 </div>
             </div>
             <div class="field">
-                <label>Emergency Contact Address</label>
+                <label>Emergency Contact Address *</label>
                 <input type="text" id="emAddress">
             </div>
         </section>
@@ -148,8 +177,8 @@
 
     <div class="actions">
         <button class="btn-secondary" onclick="goTab(-1)">Back</button>
-        <button class="btn-secondary" onclick="goTab(1)">Next</button>
-        <button class="btn-primary" onclick="submitEnrollment()"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
+        <button class="btn-secondary" id="nextBtn" onclick="goTab(1)">Next</button>
+        <button class="btn-primary" id="submitBtn" onclick="submitEnrollment()"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
     </div>
 
 </main>
@@ -217,6 +246,13 @@ function setTab(name){
     tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + name).classList.add('active');
+
+    // Hide the Next button on the final Guardian/Emergency Contact step.
+    // The user can still go Back or submit the application.
+    const nextBtn = document.getElementById('nextBtn');
+    if(nextBtn){
+        nextBtn.style.display = name === 'emergency' ? 'none' : '';
+    }
 }
 
 function goTab(dir){
@@ -235,10 +271,16 @@ function showPageMessage(text, type){
 }
 
 async function submitEnrollment(){
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn && submitBtn.disabled) return;
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const dob = document.getElementById('dob').value;
     const childAddress = document.getElementById('childAddress').value.trim();
+    const guardianName = document.getElementById('guardianName').value.trim();
+    const guardianRelationship = document.getElementById('guardianRelationship').value.trim();
+    const guardianPhone = document.getElementById('guardianPhone').value.trim();
+    const guardianAddress = document.getElementById('guardianAddress').value.trim();
     const emName = document.getElementById('emName').value.trim();
     const emRelationship = document.getElementById('emRelationship').value.trim();
     const emPhone = document.getElementById('emPhone').value.trim();
@@ -248,8 +290,8 @@ async function submitEnrollment(){
         setTab('personal');
         return;
     }
-    if(!emName || !emRelationship || !emPhone){
-        showPageMessage('Please complete all required fields in Emergency Contact.', 'error');
+    if(!guardianName || !guardianRelationship || !guardianPhone || !guardianAddress || !emName || !emRelationship || !emPhone || !document.getElementById('emAddress').value.trim()){
+        showPageMessage('Please complete all required fields in Guardian/Emergency Contact.', 'error');
         setTab('emergency');
         return;
     }
@@ -265,18 +307,32 @@ async function submitEnrollment(){
         photoDataUrl: photoDataUrl,
         docBirthCert: fileName('docBirthCert'),
         docMedicalCert: fileName('docMedicalCert'),
+        guardianName,
+        guardianRelationship,
+        guardianPhone,
+        guardianAltPhone: document.getElementById('guardianAltPhone').value.trim(),
+        guardianAddress,
         emName, emRelationship, emPhone,
         emAltPhone: document.getElementById('emAltPhone').value.trim(),
         emAddress: document.getElementById('emAddress').value.trim(),
     };
 
     try {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+        }
         await DB.createEnrollment(currentUser.username, form);
+        window.location.href = 'enrollment-pending.html';
     } catch (e) {
-        showPageMessage('Could not submit your application. Please try again.', 'error');
-        return;
+        console.error('Enrollment submission failed:', e);
+        const message = (e && e.message) ? e.message : 'Unknown database error.';
+        showPageMessage('Could not submit your application. ' + message, 'error');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Application';
+        }
     }
-    window.location.href = 'enrollment-pending.html';
 }
 
 function fileName(id){
@@ -284,10 +340,7 @@ function fileName(id){
     return (el.files && el.files[0]) ? el.files[0].name : null;
 }
 
-function logout(){
-    DB.logout();
-    window.location.href = 'index.html';
-}
+function logout(){ DB.logout(); window.location.replace('logout.html'); }
 </script>
 
 </body>

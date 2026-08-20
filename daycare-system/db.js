@@ -99,7 +99,8 @@ const DB = (function () {
       parentUsername: row.parent_username,
       status: row.status,
       childId: row.child_id,
-      classSection: row.class_section,
+      // The system now has one class only: Daycare.
+      classSection: row.class_section ? 'Daycare' : null,
       session: row.session,
       firstName: row.first_name,
       middleName: row.middle_name,
@@ -111,6 +112,11 @@ const DB = (function () {
       photoDataUrl: row.photo_data_url,
       docBirthCert: row.doc_birth_cert,
       docMedicalCert: row.doc_medical_cert,
+      guardianName: row.guardian_name,
+      guardianRelationship: row.guardian_relationship,
+      guardianPhone: row.guardian_phone,
+      guardianAltPhone: row.guardian_alt_phone,
+      guardianAddress: row.guardian_address,
       emName: row.em_name,
       emRelationship: row.em_relationship,
       emPhone: row.em_phone,
@@ -136,6 +142,11 @@ const DB = (function () {
       photo_data_url: form.photoDataUrl,
       doc_birth_cert: form.docBirthCert,
       doc_medical_cert: form.docMedicalCert,
+      guardian_name: form.guardianName,
+      guardian_relationship: form.guardianRelationship,
+      guardian_phone: form.guardianPhone,
+      guardian_alt_phone: form.guardianAltPhone,
+      guardian_address: form.guardianAddress,
       em_name: form.emName,
       em_relationship: form.emRelationship,
       em_phone: form.emPhone,
@@ -246,44 +257,83 @@ const DB = (function () {
     return { ok: true };
   }
 
-  async function resetPassword(role, username, email, newPwd) {
-    const { data: user, error: findErr } = await supabaseClient
-      .from("users")
-      .select("*")
-      .eq("role", role)
-      .ilike("username", username)
-      .maybeSingle();
-    _throwIfError(findErr, "resetPassword/find");
-
-    if (!user || (user.email || "").toLowerCase() !== (email || "").toLowerCase()) {
-      return {
-        ok: false,
-        error: "We couldn't find an account matching that role, username, and email.",
-      };
+  async function requestPasswordReset(role, username, email) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(code));
+    const codeHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+    const { data, error } = await supabaseClient.rpc("prepare_password_reset", {
+      p_role: role,
+      p_username: username,
+      p_email: email,
+      p_code_hash: codeHash
+    });
+    _throwIfError(error, "requestPasswordReset");
+    if (!data || data.ok !== true) {
+      return { ok: false, error: "We couldn't find an account matching that role, username, and email." };
     }
+    return { ok: true, code };
+  }
 
-    const { error } = await supabaseClient
-      .from("users")
-      .update({ password: newPwd })
-      .eq("username", user.username);
-    _throwIfError(error, "resetPassword/update");
+  async function completePasswordReset(role, username, email, code, newPwd) {
+    const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(code));
+    const codeHash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+    const { data, error } = await supabaseClient.rpc("complete_password_reset", {
+      p_role: role,
+      p_username: username,
+      p_email: email,
+      p_code_hash: codeHash,
+      p_new_password: newPwd
+    });
+    _throwIfError(error, "completePasswordReset");
+    if (!data || data.ok !== true) {
+      return { ok: false, error: (data && data.error) || "Invalid or expired verification code." };
+    }
     return { ok: true };
+  }
+
+  // Legacy direct reset is intentionally removed from the UI. Password changes
+  // must go through the email verification flow above.
+  async function resetPassword(role, username, email, newPwd) {
+    return { ok: false, error: "Email verification is required before resetting your password." };
   }
 
   /* ------------------------- ENROLLMENT -------------------------- */
 
   async function createEnrollment(parentUsername, form) {
+    if (!parentUsername) throw new Error("Your parent account session is missing. Please log in again.");
+
+    // Safety check: do not create another application while one is already
+    // pending/approved. A rejected application may be submitted again.
+    const { data: existing, error: existingError } = await supabaseClient
+      .from("enrollments")
+      .select("id,status")
+      .eq("parent_username", parentUsername)
+      .order("submitted_at", { ascending: false })
+      .limit(1);
+    _throwIfError(existingError, "createEnrollment/check existing");
+    const latest = existing && existing[0];
+    if (latest && (latest.status === "pending" || latest.status === "approved")) {
+      throw new Error("You already have an " + latest.status + " enrollment application.");
+    }
+
     const row = Object.assign({}, enrollmentToRow(form), {
       id: _uid("child"),
       parent_username: parentUsername,
       status: "pending",
+      child_id: null,
+      class_section: "Daycare",
+      session: null,
+      submitted_at: new Date().toISOString(),
+      decided_at: null,
+      reject_reason: null,
     });
+
     const { data, error } = await supabaseClient
       .from("enrollments")
       .insert(row)
       .select()
       .single();
-    _throwIfError(error, "createEnrollment");
+    _throwIfError(error, "createEnrollment/insert");
     _cacheClear("allEnrollments", "enrollmentByParent:" + String(parentUsername || "").toLowerCase());
     return enrollmentFromRow(data);
   }
@@ -319,7 +369,7 @@ const DB = (function () {
       .update({
         status: "approved",
         child_id: assignment.childId,
-        class_section: assignment.classSection,
+        class_section: 'Daycare',
         session: assignment.session,
         decided_at: new Date().toISOString(),
       })
@@ -532,6 +582,8 @@ const DB = (function () {
     currentUser,
     logout,
     changePassword,
+    requestPasswordReset,
+    completePasswordReset,
     resetPassword,
     createEnrollment,
     getEnrollmentByParent,
