@@ -1778,7 +1778,7 @@ async function buildReportHtml(r) {
     '<h3>Evaluation Comments</h3>' + evalCommentsHtml +
     '<h3>Final Overall Comment</h3>' +
     '<div class="print-final-comment">' + finalCommentHtml + '</div>' +
-    '<div class="print-footer"><div>Generated on ' + escapeHtml(new Date().toLocaleString()) + '</div><div class="signature-line">Teacher/Admin Signature: ____________________________</div></div>' +
+    '<div class="print-footer"><div>Generated on ' + escapeHtml(new Date().toLocaleString()) + '</div><div class="signature-line">Teacher Signature: ____________________________</div></div>' +
   '</div>';
 }
 
@@ -1829,7 +1829,7 @@ async function addChildReportToPdf(doc, r, addPageBreak) {
   const border = [203, 213, 225];
 
   if (logo) {
-    doc.addImage(logo, 'PNG', 15, 7, 16, 16);
+    doc.addImage(logo, 'g.png', 15, 7, 16, 16);
   }
 
   doc.setTextColor(...blue);
@@ -1974,7 +1974,7 @@ async function addChildReportToPdf(doc, r, addPageBreak) {
   doc.setTextColor(120, 120, 120);
   doc.setFont('helvetica', 'normal');
   doc.text('Generated on ' + new Date().toLocaleString(), 15, 250);
-  doc.text('Teacher/Admin Signature: ____________________________', 15, 263);
+  doc.text('Teacher Signature: ____________________________', 15, 263);
 }
 
 
