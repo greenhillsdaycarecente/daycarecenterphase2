@@ -50,6 +50,12 @@
 <!-- MAIN -->
 <main class="main">
 
+  <!-- Loading overlay — shown while the dashboard data is being fetched from the database -->
+  <div class="page-loader" id="pageLoader">
+    <div class="page-loader-spinner"></div>
+    <div class="page-loader-text">Loading data…</div>
+  </div>
+
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="page-header">
@@ -353,7 +359,26 @@
     showToast('📅 Switched to School Year ' + year.replace('-', '–'));
   }
 
+  function showPageLoader() {
+    const el = document.getElementById('pageLoader');
+    if (el) el.classList.add('show');
+  }
+
+  function hidePageLoader() {
+    const el = document.getElementById('pageLoader');
+    if (el) el.classList.remove('show');
+  }
+
   async function loadData() {
+    showPageLoader();
+    try {
+      await loadDataInner();
+    } finally {
+      hidePageLoader();
+    }
+  }
+
+  async function loadDataInner() {
     enrollment = await DB.getEnrollmentByParent(currentUser.username);
     if (!enrollment) { window.location.href = 'enrollment.html'; return; }
     if (enrollment.status === 'pending' || enrollment.status === 'rejected') {
