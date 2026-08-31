@@ -62,15 +62,15 @@
             <div class="grid-3">
                 <div class="field">
                     <label>First Name *</label>
-                    <input type="text" id="firstName">
+                    <input type="text" id="firstName" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Middle Name</label>
-                    <input type="text" id="middleName">
+                    <input type="text" id="middleName" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Last Name *</label>
-                    <input type="text" id="lastName">
+                    <input type="text" id="lastName" data-auto-uppercase="true">
                 </div>
             </div>
 
@@ -90,12 +90,12 @@
 
             <div class="field">
                 <label>Address *</label>
-                <input type="text" id="childAddress">
+                <input type="text" id="childAddress" data-auto-uppercase="true">
             </div>
 
             <div class="field">
                 <label>Nickname</label>
-                <input type="text" id="nickname">
+                <input type="text" id="nickname" data-auto-uppercase="true">
             </div>
         </section>
 
@@ -124,52 +124,78 @@
             <div class="grid-2">
                 <div class="field">
                     <label>Guardian Name *</label>
-                    <input type="text" id="guardianName">
+                    <input type="text" id="guardianName" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Relationship to Child *</label>
-                    <input type="text" id="guardianRelationship">
+                    <select id="guardianRelationship" data-auto-uppercase="true" required>
+                        <option value="">Select Relationship</option>
+                        <option value="FATHER">Father</option>
+                        <option value="MOTHER">Mother</option>
+                        <option value="SIBLING">Sibling</option>
+                        <option value="GRANDPARENT">Grandparent</option>
+                        <option value="AUNT">Aunt</option>
+                        <option value="UNCLE">Uncle</option>
+                    </select>
                 </div>
             </div>
             <div class="grid-2">
                 <div class="field">
                     <label>Primary Contact Number *</label>
-                    <input type="text" id="guardianPhone">
+                    <input type="text" id="guardianPhone" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Alternate Contact Number</label>
-                    <input type="text" id="guardianAltPhone">
+                    <input type="text" id="guardianAltPhone" data-auto-uppercase="true">
                 </div>
             </div>
             <div class="field">
                 <label>Guardian Contact Address *</label>
-                <input type="text" id="guardianAddress">
+                <input type="text" id="guardianAddress" data-auto-uppercase="true">
             </div>
 
-            <div class="section-subtitle" style="font-size:16px;font-weight:800;color:#1E3A8A;margin:24px 0 14px;">Emergency Contact Information</div>
+            <div class="section-subtitle emergency-heading" style="font-size:16px;font-weight:800;color:#1E3A8A;margin:24px 0 14px;">
+                <span>Emergency Contact Information</span>
+                <label class="same-contact-check">
+                    <input type="checkbox" id="sameAsGuardian">
+                    <span>Same as Parent/Guardian Contact</span>
+                </label>
+            </div>
             <div class="grid-2">
                 <div class="field">
                     <label>Emergency Contact Name *</label>
-                    <input type="text" id="emName">
+                    <input type="text" id="emName" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Relationship to Child *</label>
-                    <input type="text" id="emRelationship">
+                    <select id="emRelationship" data-auto-uppercase="true" required>
+                        <option value="">Select Relationship</option>
+                        <option value="FATHER">Father</option>
+                        <option value="MOTHER">Mother</option>
+                        <option value="SIBLING">Sibling</option>
+                        <option value="GRANDPARENT">Grandparent</option>
+                        <option value="AUNT">Aunt</option>
+                        <option value="UNCLE">Uncle</option>
+                        <option value="NIECE">Niece</option>
+                        <option value="NEPHEW">Nephew</option>
+                        <option value="OTHER RELATIVES">Other Relatives</option>
+                    </select>
+                    <input type="text" id="emOtherRelationship" data-auto-uppercase="true" placeholder="Please specify relationship" style="display:none;margin-top:8px;" autocomplete="off">
                 </div>
             </div>
             <div class="grid-2">
                 <div class="field">
                     <label>Primary Contact Number *</label>
-                    <input type="text" id="emPhone">
+                    <input type="text" id="emPhone" data-auto-uppercase="true">
                 </div>
                 <div class="field">
                     <label>Alternate Contact Number</label>
-                    <input type="text" id="emAltPhone">
+                    <input type="text" id="emAltPhone" data-auto-uppercase="true">
                 </div>
             </div>
             <div class="field">
                 <label>Emergency Contact Address *</label>
-                <input type="text" id="emAddress">
+                <input type="text" id="emAddress" data-auto-uppercase="true">
             </div>
         </section>
 
@@ -215,7 +241,17 @@ function prefill(rec){
     document.getElementById('childAddress').value = rec.childAddress || '';
     document.getElementById('nickname').value = rec.nickname || '';
     document.getElementById('emName').value = rec.emName || '';
-    document.getElementById('emRelationship').value = rec.emRelationship || '';
+    const savedEmRelationship = rec.emRelationship || '';
+    const emRelationshipSelect = document.getElementById('emRelationship');
+    const emOtherRelationship = document.getElementById('emOtherRelationship');
+    const relationshipOptions = Array.from(emRelationshipSelect.options).map(o => o.value);
+    if (relationshipOptions.includes(savedEmRelationship)) {
+        emRelationshipSelect.value = savedEmRelationship;
+    } else if (savedEmRelationship) {
+        emRelationshipSelect.value = 'OTHER RELATIVES';
+        emOtherRelationship.value = savedEmRelationship;
+        emOtherRelationship.style.display = 'block';
+    }
     document.getElementById('emPhone').value = rec.emPhone || '';
     document.getElementById('emAltPhone').value = rec.emAltPhone || '';
     document.getElementById('emAddress').value = rec.emAddress || '';
@@ -282,7 +318,9 @@ async function submitEnrollment(){
     const guardianPhone = document.getElementById('guardianPhone').value.trim();
     const guardianAddress = document.getElementById('guardianAddress').value.trim();
     const emName = document.getElementById('emName').value.trim();
-    const emRelationship = document.getElementById('emRelationship').value.trim();
+    const emRelationshipSelect = document.getElementById('emRelationship').value.trim();
+    const emOtherRelationship = document.getElementById('emOtherRelationship').value.trim();
+    const emRelationship = emRelationshipSelect === 'OTHER RELATIVES' ? emOtherRelationship : emRelationshipSelect;
     const emPhone = document.getElementById('emPhone').value.trim();
 
     if(!firstName || !lastName || !dob || !childAddress){
@@ -293,6 +331,12 @@ async function submitEnrollment(){
     if(!guardianName || !guardianRelationship || !guardianPhone || !guardianAddress || !emName || !emRelationship || !emPhone || !document.getElementById('emAddress').value.trim()){
         showPageMessage('Please complete all required fields in Guardian/Emergency Contact.', 'error');
         setTab('emergency');
+        return;
+    }
+    if(emRelationshipSelect === 'OTHER RELATIVES' && !emOtherRelationship){
+        showPageMessage('Please specify the emergency contact relationship.', 'error');
+        setTab('emergency');
+        document.getElementById('emOtherRelationship').focus();
         return;
     }
 
@@ -341,6 +385,112 @@ function fileName(id){
 }
 
 function logout(){ DB.logout(); window.location.replace('logout.html'); }
+</script>
+
+
+<script>
+/* Automatically type registration text in UPPERCASE.
+   This changes the actual field value saved/submitted by the form. */
+(function enableAutomaticUppercase(){
+    const fields = document.querySelectorAll('[data-auto-uppercase="true"]');
+    fields.forEach(field => {
+        field.addEventListener('input', function(){
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.value = this.value.toUpperCase();
+            if (typeof start === 'number' && typeof end === 'number') {
+                try { this.setSelectionRange(start, end); } catch(e) {}
+            }
+        });
+
+        // Uppercase existing/prefilled values too.
+        if (field.value) field.value = field.value.toUpperCase();
+    });
+})();
+
+
+/* Same as Parent/Guardian Contact functionality */
+(function setupSameAsGuardian(){
+    const checkbox = document.getElementById('sameAsGuardian');
+
+    const pairs = [
+        ['guardianName', 'emName'],
+        ['guardianRelationship', 'emRelationship'],
+        ['guardianPhone', 'emPhone'],
+        ['guardianAltPhone', 'emAltPhone'],
+        ['guardianAddress', 'emAddress']
+    ];
+
+    function copyGuardianToEmergency(){
+        pairs.forEach(([guardianId, emergencyId]) => {
+            const guardian = document.getElementById(guardianId);
+            const emergency = document.getElementById(emergencyId);
+            if (guardian && emergency) {
+                emergency.value = guardian.value.toUpperCase();
+                emergency.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    }
+
+    function updateEmergencyFields(){
+        const checked = checkbox.checked;
+        const otherRelationship = document.getElementById('emOtherRelationship');
+
+        if (checked) {
+            copyGuardianToEmergency();
+        }
+
+        pairs.forEach(([, emergencyId]) => {
+            const emergency = document.getElementById(emergencyId);
+            if (emergency) {
+                emergency.readOnly = checked;
+                emergency.style.backgroundColor = checked ? '#f1f5f9' : '';
+                emergency.style.cursor = checked ? 'not-allowed' : '';
+            }
+        });
+
+        if (otherRelationship) {
+            const isOther = document.getElementById('emRelationship').value === 'OTHER RELATIVES';
+            otherRelationship.style.display = isOther ? 'block' : 'none';
+            otherRelationship.disabled = checked;
+            otherRelationship.readOnly = checked;
+            otherRelationship.style.backgroundColor = checked ? '#f1f5f9' : '';
+            otherRelationship.style.cursor = checked ? 'not-allowed' : '';
+        }
+    }
+
+    // Show a custom text box when Emergency Relationship is "Other Relatives".
+    const emergencyRelationship = document.getElementById('emRelationship');
+    if (emergencyRelationship) {
+        emergencyRelationship.addEventListener('change', () => {
+            const otherRelationship = document.getElementById('emOtherRelationship');
+            const isOther = emergencyRelationship.value === 'OTHER RELATIVES';
+            if (otherRelationship) {
+                otherRelationship.style.display = isOther ? 'block' : 'none';
+                if (!isOther) otherRelationship.value = '';
+                otherRelationship.disabled = checkbox.checked;
+                otherRelationship.readOnly = checkbox.checked;
+            }
+        });
+    }
+
+    // Clicking the checkbox immediately copies all Guardian information.
+    checkbox.addEventListener('change', updateEmergencyFields);
+
+    // Keep Emergency Contact synchronized while the checkbox is checked.
+    pairs.forEach(([guardianId]) => {
+        const guardian = document.getElementById(guardianId);
+        if (guardian) {
+            guardian.addEventListener('input', function(){
+                if (checkbox.checked) copyGuardianToEmergency();
+            });
+        }
+    });
+
+    updateEmergencyFields();
+})();
+
+
 </script>
 
 </body>

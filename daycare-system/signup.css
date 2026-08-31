@@ -91,6 +91,38 @@ body{
     margin-bottom:2px;
 }
 
+.guardian-label{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.same-name-option{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12px;
+    font-weight:500;
+    color:#5f6b66;
+    cursor:pointer;
+    white-space:nowrap;
+}
+
+.same-name-option input[type="checkbox"]{
+    width:15px;
+    height:15px;
+    margin:0;
+    accent-color:#2e8b57;
+    cursor:pointer;
+}
+
+.same-name-locked{
+    background-color:#f3f7f4 !important;
+    cursor:not-allowed;
+}
+
 .input-group label{
     display:block;
     margin-bottom:4px;
@@ -241,3 +273,6 @@ body{
         width:90px;
     }
 }
+
+/* Automatic uppercase form fields */
+input[data-auto-uppercase="true"]{ text-transform:uppercase; }

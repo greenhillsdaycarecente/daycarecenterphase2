@@ -302,3 +302,46 @@ body{
     .grid-3{grid-template-columns:1fr;}
     .grid-2{grid-template-columns:1fr;}
 }
+
+/* Automatic uppercase form fields */
+input[data-auto-uppercase="true"]{ text-transform:uppercase; }
+
+
+/* Emergency contact "same as guardian" checkbox */
+.emergency-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+}
+
+.same-contact-check{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+    color:#334155;
+    cursor:pointer;
+    background:#f7faff;
+    border:1px solid #dbe6f7;
+    border-radius:8px;
+    padding:8px 12px;
+}
+
+.same-contact-check input{
+    width:17px;
+    height:17px;
+    accent-color:#1d5bbf;
+    cursor:pointer;
+    margin:0;
+}
+
+.same-contact-check span{
+    line-height:1.2;
+}
+
+.field input[readonly]{
+    opacity:.85;
+}
