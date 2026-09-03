@@ -823,3 +823,31 @@ body {
 .evaluation-pie-wrap { position: relative; height: 280px; width: 100%; }
 .evaluation-pie-wrap canvas { width: 100% !important; height: 100% !important; }
 @media (max-width: 900px) { .evaluation-pie-grid { grid-template-columns: 1fr; } .evaluation-pie-wrap { height: 300px; } }
+
+
+/* Teacher comment column in Admin > Performance Reports */
+.teacher-comment-table-cell {
+  min-width: 220px;
+  max-width: 300px;
+}
+.teacher-comment-input {
+  width: 100%;
+  min-width: 200px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--border, #dbeafe);
+  border-radius: 8px;
+  background: var(--input-bg, #fff);
+  color: var(--text-dark, #1f2937);
+  font: inherit;
+  font-size: 13px;
+}
+.teacher-comment-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, .12);
+}
+
+.teacher-comment-editor { display:flex; gap:6px; align-items:center; }
+.teacher-comment-editor .teacher-comment-input { flex:1; min-width:0; }
+.btn-save-teacher-comment { white-space:nowrap; padding:8px 10px; font-size:12px; }

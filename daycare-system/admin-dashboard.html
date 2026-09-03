@@ -318,6 +318,7 @@
               <th>Cognitive</th>
               <th>Social-Emotional</th>
               <th>Final Avg.</th>
+              <th>Teacher Comment</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -602,7 +603,7 @@
       <input id="sy-input-label" placeholder="e.g. 2026-2027" style="width:100%; padding:9px 11px; border:1px solid #BFDBFE; border-radius:8px; margin-top:4px;">
     </div>
     <div class="detail-group">
-      <div class="detail-label">End of School Year (used for age calculations)</div>
+      <div class="detail-label">End of School Year (for records/reports)</div>
       <input id="sy-input-end" type="date" style="width:100%; padding:9px 11px; border:1px solid #BFDBFE; border-radius:8px; margin-top:4px;">
     </div>
 
@@ -1219,16 +1220,18 @@ async function renderPerfTable(approved) {
   const body = document.getElementById('perfTableBody');
   if (!body) return;
   const rows = applyClassAndSearch(approved, 'perfClassFilter', 'perfSearch');
-  if (!rows.length) { body.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-light);">No enrolled children yet.</td></tr>'; return; }
+  if (!rows.length) { body.innerHTML = '<tr><td colspan="12" style="text-align:center;color:var(--text-light);">No enrolled children yet.</td></tr>'; return; }
   const rowsHtml = await Promise.all(rows.map(async r => {
     const cid = r.childId || r.id;
     const perf = await DB.getPerformance(cid);
     const finals = perf.domains.map(d => getDomainFinalValue(perf, d));
     const normalized = perf.domains.map(d => getDomainNormalizedValue(perf, d));
     const overallAvg = (normalized.reduce((s, v) => s + v, 0) / normalized.length || 0).toFixed(1);
+    const teacherComment = String(perf.teacherComment || '');
     return '<tr><td>' + childAvatarHtml(r) + childDisplayName(r) + '</td><td>' + (r.classSection || 'TBD') + '</td>' +
       finals.map((f, i) => '<td>' + (i === 0 ? numberFor(f) : numberFor(f)) + '</td>').join('') +
       '<td><span class="rating-badge">' + overallAvg + '</span></td>' +
+      '<td class="teacher-comment-table-cell"><div class="teacher-comment-editor"><input type="text" class="teacher-comment-input" id="teacherComment_' + cid + '" value="' + escapeAttr(teacherComment) + '" placeholder="Write teacher comment..." aria-label="Teacher comment for ' + escapeAttr(childDisplayName(r)) + '"><button type="button" class="action-btn btn-save-teacher-comment" onclick="saveTeacherComment(\'' + cid + '\', document.getElementById(\'teacherComment_' + cid + '\').value, this)">💾 Save</button></div></td>' +
       '<td><button class="action-btn btn-view performance-edit-btn" onclick="openPerf(\'' + cid + '\',\'' + childDisplayName(r).replace(/'/g,"") + '\')">✏️ Edit</button></td></tr>';
   }));
   body.innerHTML = rowsHtml.join('');
@@ -1694,6 +1697,26 @@ function recalcChecklistTotals() {
   if (c1 || c2 || c3) checklist._dirty = true;
 }
 
+async function saveTeacherComment(childId, value, button) {
+  const comment = String(value || '').trim();
+  try {
+    const perf = await DB.getPerformance(childId);
+    await DB.setPerformance(childId, {
+      domains: perf.domains || [],
+      evalComments: perf.evalComments || { e1: '', e2: '', e3: '' },
+      finalComment: perf.finalComment || '',
+      domainComments: perf.domainComments || {},
+      checklists: perf.checklists || {},
+      teacherComment: comment
+    });
+    if (button) { button.textContent = '✓ Saved'; setTimeout(() => { button.textContent = '💾 Save'; }, 1200); }
+    showToast(comment ? 'Teacher comment saved.' : 'Teacher comment cleared.');
+  } catch (e) {
+    console.error('Could not save teacher comment:', e);
+    showToast('⚠️ Could not save teacher comment.');
+  }
+}
+
 async function savePerformance() {
   const perf = await DB.getPerformance(activePerfChildId);
   const domains = (perf.domains || []).map(d => Object.assign({}, d));
@@ -1740,7 +1763,8 @@ async function savePerformance() {
     evalComments: activeComments,
     finalComment: activeComments.final,
     domainComments: window.activePerformanceComments,
-    checklists
+    checklists,
+    teacherComment: perf.teacherComment || ''
   });
 
   showToast('Performance checklist, totals & comments saved!');

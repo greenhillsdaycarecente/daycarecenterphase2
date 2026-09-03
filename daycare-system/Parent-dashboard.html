@@ -620,18 +620,19 @@
   }
 
   async function renderComments() {
-    const comments = (await DB.getComments(enrollment.childId || enrollment.id)).filter(c => c.from === 'teacher');
+    const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
+    const teacherComment = String(perf.teacherComment || '').trim();
     const box = document.getElementById('teacherComments');
-    if (!comments.length) {
-      box.innerHTML = '<div style="color:var(--text-light); font-size:14px;">No comments yet.</div>';
+    if (!teacherComment) {
+      box.innerHTML = '<div style="color:var(--text-light); font-size:14px;">No teacher comment yet.</div>';
       return;
     }
-    box.innerHTML = comments.slice().reverse().map(c => {
-      return '<div style="background:var(--blue-light); border-radius:10px; padding:12px 16px;">' +
+    box.innerHTML =
+      '<div style="background:var(--blue-light); border-radius:10px; padding:12px 16px;">' +
         '<div style="font-weight:800; font-size:12px; color:var(--blue-dark); margin-bottom:4px;">' +
-        '👩‍🏫 Teacher · ' + new Date(c.date).toLocaleString() + '</div>' +
-        '<div style="font-size:14px; color:var(--text-dark);">' + c.text.replace(/</g,'&lt;') + '</div></div>';
-    }).join('');
+        '👩‍🏫 Teacher Comment</div>' +
+        '<div style="font-size:14px; color:var(--text-dark); white-space:pre-wrap;">' +
+        escapeParentHtml(teacherComment) + '</div></div>';
   }
 
   loadData();
@@ -686,6 +687,7 @@
     const age = DB.calculateAge(enrollment.dob);
     const perf = await DB.getPerformance(enrollment.childId || enrollment.id);
     const comments = (await DB.getComments(enrollment.childId || enrollment.id)).filter(c => c.from === 'teacher');
+    const teacherComment = String(perf.teacherComment || '').trim();
 
     document.getElementById('pr_sy').textContent = document.getElementById('sySpan4').textContent || await DB.getSchoolYear();
     document.getElementById('pr_name').textContent = fullName;
@@ -702,8 +704,11 @@
       return '<tr><td>' + escapeParentHtml(a.name) + '</td><td>' + Number(a.e1 || a.q1 || 0) + '</td><td>' + Number(a.e2 || a.q2 || 0) + '</td><td>' + Number(a.e3 || a.q3 || 0) + '</td><td>' + final + '</td></tr>';
     }).join('');
 
-    document.getElementById('pr_comments').innerHTML = comments.length
-      ? comments.map(c => '<div class="print-comment">' + new Date(c.date).toLocaleDateString() + ' &mdash; ' + c.text.replace(/</g,'&lt;') + '</div>').join('')
+    const allParentReportComments = [];
+    if (teacherComment) allParentReportComments.push('<div class="print-comment"><strong>Teacher Comment:</strong> ' + escapeParentHtml(teacherComment) + '</div>');
+    comments.forEach(c => allParentReportComments.push('<div class="print-comment">' + new Date(c.date).toLocaleDateString() + ' &mdash; ' + c.text.replace(/</g,'&lt;') + '</div>'));
+    document.getElementById('pr_comments').innerHTML = allParentReportComments.length
+      ? allParentReportComments.join('')
       : '<div class="print-comment">No comments recorded.</div>';
 
     return fullName;

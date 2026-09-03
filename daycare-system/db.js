@@ -429,7 +429,7 @@ const DB = (function () {
       .from("performance")
       .upsert({
         child_id: childId,
-        areas: { domains: domains, evalComments: evalComments, finalComment: finalComment, domainComments: domainComments, checklists: checklists },
+        areas: { domains: domains, evalComments: evalComments, finalComment: finalComment, domainComments: domainComments, checklists: checklists, teacherComment: perf.teacherComment || "" },
         updated_at: new Date().toISOString(),
       });
     _throwIfError(error, "setPerformance");
@@ -499,9 +499,18 @@ const DB = (function () {
     return _cacheSet("settings", data);
   }
 
-  async function ageAtEndOfSchoolYear(dobStr) {
-    const settings = await _getSettings();
-    return calculateAge(dobStr, settings.school_year_end);
+  // "Age at End of School Year" = the child's current age, plus the
+  // daycare's 9-month school year duration (not tied to the settings
+  // end-of-school-year date).
+  function ageAtEndOfSchoolYear(dobStr) {
+    const age = calculateAge(dobStr);
+    let years = age.years;
+    let months = age.months + 9;
+    if (months >= 12) {
+      years += Math.floor(months / 12);
+      months = months % 12;
+    }
+    return { years, months, days: age.days };
   }
 
   async function getSchoolYear() {
