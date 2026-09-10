@@ -127,6 +127,9 @@ const DB = (function () {
       submittedAt: row.submitted_at,
       decidedAt: row.decided_at,
       rejectReason: row.reject_reason,
+      consentAgreed: row.consent_agreed,
+      consentTimestamp: row.consent_timestamp,
+      consentVersion: row.consent_version,
     };
   }
 
@@ -154,6 +157,9 @@ const DB = (function () {
       em_address: form.emAddress,
       allergies: form.allergies,
       blood_type: form.bloodType,
+      consent_agreed: form.consentAgreed === true,
+      consent_timestamp: form.consentTimestamp || null,
+      consent_version: form.consentVersion || null,
     };
   }
 
@@ -300,6 +306,9 @@ const DB = (function () {
   /* ------------------------- ENROLLMENT -------------------------- */
 
   async function createEnrollment(parentUsername, form) {
+    if (form.consentAgreed !== true) {
+      throw new Error('Parent/Guardian consent is required before an enrollment application can be submitted.');
+    }
     if (!parentUsername) throw new Error("Your parent account session is missing. Please log in again.");
 
     // Safety check: do not create another application while one is already

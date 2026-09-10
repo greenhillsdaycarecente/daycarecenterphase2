@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daycare Center - Enrollment Form</title>
-    <link rel="stylesheet" href="enrollment.css">
+    <link rel="stylesheet" href="enrollment.css?v=20260910-consent">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
@@ -21,7 +21,146 @@
     <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
 </header>
 
-<main class="page">
+<!-- Mandatory parent/guardian consent gate -->
+<div id="consentGate" class="consent-gate" role="dialog" aria-modal="true" aria-labelledby="consentTitle">
+    <div class="consent-modal">
+        <div class="consent-header">
+            <div>
+                <h2 id="consentTitle">Terms and Conditions &amp; Parent/Guardian Consent</h2>
+                <p>Please read the information below before accessing the enrollment form.</p>
+            </div>
+        </div>
+
+        <div class="consent-body">
+            <section class="terms-section">
+                <h3>1. About the Greenhills Phase II Daycare Center Information System</h3>
+                <p>
+                    The Greenhills Phase II Daycare Center Information System is a web-based information system
+                    developed to assist the Daycare Center in managing child enrollment, records, monitoring, and
+                    developmental information in a more organized, accurate, secure, and efficient manner. The
+                    system is designed to reduce errors associated with manual and spreadsheet-based recording and
+                    to support accurate and accessible information for authorized users.
+                </p>
+
+                <h3>2. Information Collected</h3>
+                <p>The system may collect and store information necessary for enrollment and daycare management, including:</p>
+                <ul>
+                    <li>Child's full name, date of birth, gender, address, and nickname;</li>
+                    <li>Child photo, birth certificate, medical certificate, and other submitted document information, when provided;</li>
+                    <li>Parent/guardian name, relationship, contact number, and address;</li>
+                    <li>Emergency contact information; and</li>
+                    <li>Enrollment status, class/session information, developmental evaluations, performance results, teacher comments, and related progress information.</li>
+                </ul>
+
+                <h3>3. Purpose and Capabilities of the System</h3>
+                <p>The information provided will be used to support the following daycare-related activities:</p>
+                <ul>
+                    <li>Processing and managing child enrollment applications;</li>
+                    <li>Organizing and maintaining child and enrollment records;</li>
+                    <li>Automatically calculating the child's age based on the date of birth;</li>
+                    <li>Supporting age-based eligibility verification for enrollment;</li>
+                    <li>Providing parents/guardians with access to their child's enrollment information and progress;</li>
+                    <li>Recording and monitoring child developmental milestones, evaluations, and teacher comments;</li>
+                    <li>Generating and printing organized performance reports; and</li>
+                    <li>Providing reports and analytics to assist authorized Daycare Center personnel in evaluating child development and making informed administrative decisions.</li>
+                </ul>
+
+                <h3>4. Role-Based Access, Storage, and Protection</h3>
+                <p>
+                    Access to information is controlled according to the user's assigned role and responsibilities.
+                    Parents/guardians may only view information related to their own child and cannot access, edit, or modify the records of their child or other students. They may print their own child's authorized records, including developmental and performance records, while teachers and
+                    administrators may access and manage records.
+                    Role-based permissions help protect essential child and enrollment information from unauthorized
+                    access. Reasonable administrative and technical measures are used to help protect information
+                    from unauthorized access, alteration, disclosure, or misuse.
+                </p>
+
+                <h3>5. Automated Age Calculation and Eligibility Verification</h3>
+                <p>
+                    The system may automatically calculate the child's age using the date of birth provided during
+                    enrollment. The calculated age may be used to support age-based eligibility verification and
+                    enrollment processing. This capability is intended to improve accuracy, reduce manual computation,
+                    speed up verification, and promote consistent processing of enrollment applications. The accuracy
+                    of the calculation and eligibility result depends on the correctness of the information provided.
+                </p>
+
+                <h3>6. Enrollment Monitoring and Child Progress</h3>
+                <p>
+                    The system allows parents/guardians to monitor their child's enrollment information and status
+                    through their account. Parents/guardians may also view available information about their child's
+                    assigned class/session and developmental progress. Authorized teachers and administrators may
+                    record evaluations, milestones, observations, performance results, and comments. This capability
+                    is intended to encourage parent involvement and provide organized information about the child's
+                    growth, achievements, and development.
+                </p>
+
+                <h3>7. Reports and Analytics</h3>
+                <p>
+                    The system may generate and print performance reports containing authorized developmental
+                    evaluation results, progress information, and teacher comments. Reports and analytics are intended
+                    to support the evaluation of each child's growth and development and provide organized information
+                    that teachers and parents can use to view achievements and progress. Authorized administrators and
+                    teachers may also use aggregated or appropriate system information to support data-driven decisions
+                    and daycare program enhancement.
+                </p>
+
+                <h3>8. Parent/Guardian Responsibility</h3>
+                <p>
+                    The parent/guardian is responsible for providing accurate, complete, and truthful information and
+                    for ensuring that they are authorized to provide the child's information for enrollment. If an
+                    error is discovered or information changes, the parent/guardian should inform the Daycare Center
+                    so the appropriate record can be reviewed and corrected by authorized personnel.
+                </p>
+
+                <h3>9. Parent/Guardian Consent</h3>
+                <p>
+                    By selecting <strong>“I Agree and Continue”</strong>, you confirm that you are the parent/guardian
+                    or an authorized representative of the child identified in the enrollment application. You
+                    voluntarily consent to the collection, storage, processing, access, and authorized use of the
+                    child's and guardian's information for the legitimate daycare-related purposes and system
+                    capabilities described above.
+                </p>
+                <p>
+                    You understand that the system uses role-based permissions to limit access according to user
+                    responsibilities, automatically calculates age and supports eligibility verification, provides
+                    enrollment and child-progress monitoring, organizes child records, and generates reports and
+                    analytics for authorized daycare personnel. You also understand that developmental evaluations,
+                    performance information, and teacher comments may be recorded by authorized personnel and made
+                    available to you through your parent account.
+                </p>
+                <p>
+                    Your consent is required before you can access and submit the enrollment form through this system.
+                    If you select <strong>“I Do Not Agree”</strong>, you will not be allowed to proceed with enrollment
+                    through the system.
+                </p>
+            </section>
+
+        <div class="consent-confirmation">
+                <label class="consent-check-row" for="consentCheckbox">
+                    <input type="checkbox" id="consentCheckbox">
+                    <span>
+                        I have read and understood the Terms and Conditions. I am the parent/guardian or
+                        authorized representative of the child, and I consent to the collection, storage, processing,
+                        access, and authorized use of the child's information for enrollment, age and eligibility
+                        verification, progress monitoring, performance evaluation, reporting, and daycare administration.
+                    </span>
+                </label>
+                <p id="consentHint" class="consent-hint">Please check the box to enable “I Agree and Continue”.</p>
+            </div>
+        </div>
+
+        <div class="consent-footer">
+            <button type="button" class="consent-decline" id="declineConsentBtn">
+                <i class="fa-solid fa-xmark"></i> I Do Not Agree
+            </button>
+            <button type="button" class="consent-agree" id="agreeConsentBtn" disabled>
+                <i class="fa-solid fa-check"></i> I Agree and Continue
+            </button>
+        </div>
+    </div>
+</div>
+
+<main class="page" id="enrollmentPage">
 
     <div id="pageMessage" class="form-message" style="display:none;"></div>
 
@@ -211,7 +350,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="supabase.js"></script>
-<script src="db.js"></script>
+<script src="db.js?v=20260910-consent"></script>
 <script>
 const currentUser = DB.currentUser();
 if(!currentUser || currentUser.role !== 'parent'){
@@ -307,6 +446,13 @@ function showPageMessage(text, type){
 }
 
 async function submitEnrollment(){
+    // Hard client-side gate: enrollment cannot be submitted without explicit consent.
+    if (!hasEnrollmentConsent()) {
+        showPageMessage('You must read and agree to the Terms and Conditions before submitting the enrollment application.', 'error');
+        openConsentGate();
+        return;
+    }
+
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn && submitBtn.disabled) return;
     const firstName = document.getElementById('firstName').value.trim();
@@ -359,6 +505,9 @@ async function submitEnrollment(){
         emName, emRelationship, emPhone,
         emAltPhone: document.getElementById('emAltPhone').value.trim(),
         emAddress: document.getElementById('emAddress').value.trim(),
+        consentAgreed: true,
+        consentTimestamp: new Date().toISOString(),
+        consentVersion: '2026-09-10-v2',
     };
 
     try {
@@ -383,6 +532,87 @@ function fileName(id){
     const el = document.getElementById(id);
     return (el.files && el.files[0]) ? el.files[0].name : null;
 }
+
+/* ===================== MANDATORY CONSENT GATE ===================== */
+const CONSENT_STORAGE_KEY = 'greenhills_enrollment_consent_v2';
+const CONSENT_VERSION = '2026-09-10-v2';
+
+function hasEnrollmentConsent(){
+    return sessionStorage.getItem(CONSENT_STORAGE_KEY) === CONSENT_VERSION;
+}
+
+function openConsentGate(){
+    const gate = document.getElementById('consentGate');
+    if (!gate) return;
+    gate.classList.add('is-open');
+    document.body.classList.add('consent-locked');
+    const checkbox = document.getElementById('consentCheckbox');
+    if (checkbox) checkbox.focus();
+}
+
+function closeConsentGate(){
+    const gate = document.getElementById('consentGate');
+    if (gate) gate.classList.remove('is-open');
+    document.body.classList.remove('consent-locked');
+}
+
+function showEnrollmentPage(){
+    const page = document.getElementById('enrollmentPage');
+    if (page) page.classList.add('consent-unlocked');
+    closeConsentGate();
+}
+
+function lockEnrollmentPage(){
+    const page = document.getElementById('enrollmentPage');
+    if (page) page.classList.remove('consent-unlocked');
+    openConsentGate();
+}
+
+(function setupConsentGate(){
+    const checkbox = document.getElementById('consentCheckbox');
+    const agreeBtn = document.getElementById('agreeConsentBtn');
+    const declineBtn = document.getElementById('declineConsentBtn');
+    const hint = document.getElementById('consentHint');
+
+    if (!checkbox || !agreeBtn || !declineBtn) return;
+
+    function syncAgreeButton(){
+        agreeBtn.disabled = !checkbox.checked;
+        if (hint) {
+            hint.textContent = checkbox.checked
+                ? 'Consent selected. You may now continue to the enrollment form.'
+                : 'Please check the box to enable “I Agree and Continue”.';
+            hint.classList.toggle('ready', checkbox.checked);
+        }
+    }
+
+    checkbox.addEventListener('change', syncAgreeButton);
+
+    agreeBtn.addEventListener('click', function(){
+        if (!checkbox.checked) return;
+        sessionStorage.setItem(CONSENT_STORAGE_KEY, CONSENT_VERSION);
+        showEnrollmentPage();
+    });
+
+    declineBtn.addEventListener('click', function(){
+        sessionStorage.removeItem(CONSENT_STORAGE_KEY);
+        const ok = window.confirm('You did not agree to the Terms and Conditions. You cannot submit an enrollment application without consent. Do you want to return to the login page?');
+        if (ok) {
+            window.location.href = 'index.html';
+        }
+    });
+
+    // The form is locked until consent is explicitly given in this session.
+    if (hasEnrollmentConsent()) {
+        checkbox.checked = true;
+        syncAgreeButton();
+        showEnrollmentPage();
+    } else {
+        checkbox.checked = false;
+        syncAgreeButton();
+        lockEnrollmentPage();
+    }
+})();
 
 function logout(){ DB.logout(); window.location.replace('logout.html'); }
 </script>
