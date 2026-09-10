@@ -58,7 +58,7 @@ body {
 .sidebar::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.78) 60%, rgba(255,255,255,0.55) 100%);
+  background: linear-gradient(180deg, rgba(211, 209, 209, 0.8) 0%, rgba(211, 209, 209, 0.8) 60%, rgba(211, 209, 209, 0.8) 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -228,7 +228,7 @@ body {
 
 .sy-badge {
   display: flex; align-items: center; gap: 8px;
-  background: var(--card-bg); border: 1.5px solid #BFDBFE;
+  background: var(--card-bg); border: 2px solid #000000;
   border-radius: 10px; padding: 8px 14px;
   font-size: 13px; font-weight: 700; color: var(--blue-dark);
   cursor: pointer; backdrop-filter: blur(4px);
@@ -241,7 +241,7 @@ body {
   -webkit-appearance: none;
   -moz-appearance: none;
   background: var(--card-bg);
-  border: 1.5px solid #BFDBFE;
+  border: 2px solid #000000;
   border-radius: 10px;
   padding: 8px 32px 8px 14px;
   font-size: 13px;
@@ -405,7 +405,7 @@ body {
 .form-label { display: block; font-size: 13px; font-weight: 700; color: var(--text-mid); margin-bottom: 7px; }
 .form-input-wrap { position: relative; }
 .form-input {
-  width: 100%; border: 1.5px solid #BFDBFE; border-radius: 10px;
+  width: 100%; border: 2px solid #000000; border-radius: 10px;
   padding: 12px 44px 12px 14px; font-size: 14px;
   font-family: 'Nunito', sans-serif; color: var(--text-dark);
   outline: none; transition: border-color 0.2s;
@@ -457,7 +457,7 @@ body {
 .modal-desc { font-size: 14px; color: var(--text-mid); margin-bottom: 28px; font-weight: 600; }
 .modal-actions { display: flex; gap: 12px; justify-content: center; }
 .btn-cancel {
-  padding: 11px 28px; border-radius: 10px; border: 1.5px solid #BFDBFE;
+  padding: 11px 28px; border-radius: 10px; border: 2px solid #000000;
   background: white; font-size: 14px; font-weight: 700; color: var(--text-mid);
   cursor: pointer; font-family: 'Nunito', sans-serif; transition: all 0.2s;
 }
@@ -621,3 +621,16 @@ body {
 .evaluation-pie-wrap { position: relative; height: 280px; width: 100%; }
 .evaluation-pie-wrap canvas { width: 100% !important; height: 100% !important; }
 @media (max-width: 900px) { .evaluation-pie-grid { grid-template-columns: 1fr; } .evaluation-pie-wrap { height: 300px; } }
+
+/* ── CARD CONTRAST (thicker borders) ── */
+.child-card,
+.section-card,
+.info-card,
+.evaluation-pie-item {
+  border: 2px solid #000000;
+}
+
+.sy-badge,
+.sy-select {
+  border-width: 2px;
+}
