@@ -486,7 +486,7 @@
     if (!hasData) return;
     parentDomainAverageChart = new Chart(canvas.getContext('2d'), {
       type: 'line',
-      data: { labels, datasets: [{ label: 'Average Final Score', data: values, spanGaps: true, tension: 0.3, fill: false, borderWidth: 3, pointRadius: 4, pointHoverRadius: 6 }] },
+      data: { labels, datasets: [{ label: 'Average Final Score', data: values, spanGaps: true, tension: 0, fill: false, borderWidth: 3, pointRadius: 4, pointHoverRadius: 6 }] },
       options: {
         responsive: true, maintainAspectRatio: false,
         scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 }, title: { display: true, text: 'Average Score' } }, x: { ticks: { autoSkip: false, maxRotation: 35, minRotation: 20 } } },
